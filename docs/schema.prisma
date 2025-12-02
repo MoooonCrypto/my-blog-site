@@ -1,0 +1,65 @@
+// This is a schema file for documentation purposes.
+// The actual schema will be managed via Supabase UI/migrations.
+
+datasource db {
+  provider = "postgresql"
+  url      = "env(DATABASE_URL)" // This will be set in the Supabase project
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User profile table, linked to Supabase Auth users
+model Profile {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  username   String
+  bio        String?
+  avatar_url String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("profiles")
+}
+
+// Enum for project types
+enum ProjectType {
+  PORTFOLIO
+  SANDBOX
+}
+
+// Projects table for portfolio and sandbox items
+model Project {
+  id            String      @id @default(uuid())
+  title         String
+  description   String
+  thumbnail_url String
+  project_url   String?
+  github_url    String?
+  technologies  String[]
+  type          ProjectType
+  published     Boolean     @default(false)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  @@map("projects")
+}
+
+// Blog posts table
+model Post {
+  id            String   @id @default(uuid())
+  title         String
+  content       String   // Markdown content
+  thumbnail_url String?
+  published     Boolean  @default(false)
+  author_id     String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  author Profile @relation(fields: [author_id], references: [id])
+
+  @@map("posts")
+}
