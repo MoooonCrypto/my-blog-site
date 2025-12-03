@@ -31,8 +31,8 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "My Portfolio & Blog",
-  description: "A personal portfolio and blog site.",
+  title: "MokosauBlog",
+  description: "プロダクトと技術記事を発信するブログ",
 };
 
 export default function RootLayout({
