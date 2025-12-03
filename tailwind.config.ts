@@ -19,7 +19,10 @@ const config = {
 	},
 	extend: {
 		fontFamily: {
-			sans: ['var(--font-sans-jp)', 'var(--font-sans)', 'sans-serif']
+			heading: ['var(--font-heading)', 'var(--font-sans-jp)', 'sans-serif'],
+			body: ['var(--font-body)', 'var(--font-sans-jp)', 'sans-serif'],
+			mono: ['var(--font-mono)', 'monospace'],
+			sans: ['var(--font-body)', 'var(--font-sans-jp)', 'sans-serif']
 		},
 		keyframes: {
 			'accordion-down': {
