@@ -18,6 +18,9 @@ const config = {
 		}
 	},
 	extend: {
+		fontFamily: {
+			sans: ['var(--font-sans-jp)', 'var(--font-sans)', 'sans-serif']
+		},
 		keyframes: {
 			'accordion-down': {
 				from: {
