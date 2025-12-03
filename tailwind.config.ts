@@ -18,6 +18,12 @@ const config = {
 		}
 	},
 	extend: {
+		fontFamily: {
+			heading: ['var(--font-heading)', 'var(--font-sans-jp)', 'sans-serif'],
+			body: ['var(--font-body)', 'var(--font-sans-jp)', 'sans-serif'],
+			mono: ['var(--font-mono)', 'monospace'],
+			sans: ['var(--font-body)', 'var(--font-sans-jp)', 'sans-serif']
+		},
 		keyframes: {
 			'accordion-down': {
 				from: {
