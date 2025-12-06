@@ -3,7 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SocialIcon } from "@/components/SocialIcon";
 import { cn } from "@/lib/utils";
+
+// TODO: これらの値は将来的に管理画面から設定できるようにする
+const socialLinks = {
+  x: "https://twitter.com/mokosau",
+  instagram: "https://instagram.com/mokosau",
+  tiktok: "https://tiktok.com/@mokosau",
+  youtube: "https://youtube.com/@mokosau",
+  note: "https://note.com/mokosau",
+  zenn: "https://zenn.dev/mokosau",
+  qiita: "https://qiita.com/mokosau",
+  izanami: "",
+};
 
 export const Header = () => {
   const pathname = usePathname();
@@ -17,13 +30,28 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b glass-effect">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        {/* Logo */}
         <Link
           href="/"
-          className="font-heading font-bold text-xl md:text-2xl tracking-tight hover:text-primary transition-colors"
+          className="font-heading font-bold text-lg md:text-2xl tracking-tight hover:text-primary transition-colors flex-shrink-0"
         >
           MokosauBlog
         </Link>
+
+        {/* Social Icons - Hidden on mobile */}
+        <div className="hidden md:flex items-center gap-2">
+          <SocialIcon platform="x" href={socialLinks.x} />
+          <SocialIcon platform="instagram" href={socialLinks.instagram} />
+          <SocialIcon platform="tiktok" href={socialLinks.tiktok} />
+          <SocialIcon platform="youtube" href={socialLinks.youtube} />
+          <SocialIcon platform="note" href={socialLinks.note} />
+          <SocialIcon platform="zenn" href={socialLinks.zenn} />
+          <SocialIcon platform="qiita" href={socialLinks.qiita} />
+          {socialLinks.izanami && <SocialIcon platform="izanami" href={socialLinks.izanami} />}
+        </div>
+
+        {/* Navigation */}
         <nav className="flex items-center gap-1 md:gap-2">
           <ul className="flex items-center space-x-0.5 md:space-x-1 mr-1 md:mr-2">
             {links.map((link) => (
@@ -44,6 +72,22 @@ export const Header = () => {
           </ul>
           <ThemeToggle />
         </nav>
+      </div>
+
+      {/* Mobile Social Icons - Show below header */}
+      <div className="md:hidden border-t border-border/50">
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex items-center justify-center gap-2">
+            <SocialIcon platform="x" href={socialLinks.x} />
+            <SocialIcon platform="instagram" href={socialLinks.instagram} />
+            <SocialIcon platform="tiktok" href={socialLinks.tiktok} />
+            <SocialIcon platform="youtube" href={socialLinks.youtube} />
+            <SocialIcon platform="note" href={socialLinks.note} />
+            <SocialIcon platform="zenn" href={socialLinks.zenn} />
+            <SocialIcon platform="qiita" href={socialLinks.qiita} />
+            {socialLinks.izanami && <SocialIcon platform="izanami" href={socialLinks.izanami} />}
+          </div>
+        </div>
       </div>
     </header>
   );

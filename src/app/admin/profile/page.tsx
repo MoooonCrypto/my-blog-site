@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, User, Save } from "lucide-react";
+import { ArrowLeft, User, Save, Share2 } from "lucide-react";
 
 export default function AdminProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
@@ -123,12 +123,129 @@ export default function AdminProfilePage() {
             </CardContent>
           </Card>
 
+          {/* SNS Links Settings */}
+          <Card className="border-border/50">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-primary" />
+                <CardTitle className="font-heading">SNSリンク設定</CardTitle>
+              </div>
+              <CardDescription>
+                ヘッダーに表示されるSNSアイコンのリンク先を設定します
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="social_x" className="flex items-center gap-2">
+                    <span className="text-base">𝕏</span>
+                    X (Twitter)
+                  </Label>
+                  <Input
+                    id="social_x"
+                    placeholder="https://twitter.com/username"
+                    defaultValue="https://twitter.com/mokosau"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="social_instagram" className="flex items-center gap-2">
+                    <span className="text-base">📷</span>
+                    Instagram
+                  </Label>
+                  <Input
+                    id="social_instagram"
+                    placeholder="https://instagram.com/username"
+                    defaultValue="https://instagram.com/mokosau"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="social_tiktok" className="flex items-center gap-2">
+                    <span className="text-base">🎵</span>
+                    TikTok
+                  </Label>
+                  <Input
+                    id="social_tiktok"
+                    placeholder="https://tiktok.com/@username"
+                    defaultValue="https://tiktok.com/@mokosau"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="social_youtube" className="flex items-center gap-2">
+                    <span className="text-base">▶️</span>
+                    YouTube
+                  </Label>
+                  <Input
+                    id="social_youtube"
+                    placeholder="https://youtube.com/@username"
+                    defaultValue="https://youtube.com/@mokosau"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="social_note" className="flex items-center gap-2">
+                    <span className="text-base">📝</span>
+                    note
+                  </Label>
+                  <Input
+                    id="social_note"
+                    placeholder="https://note.com/username"
+                    defaultValue="https://note.com/mokosau"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="social_zenn" className="flex items-center gap-2">
+                    <span className="text-base">📘</span>
+                    Zenn
+                  </Label>
+                  <Input
+                    id="social_zenn"
+                    placeholder="https://zenn.dev/username"
+                    defaultValue="https://zenn.dev/mokosau"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="social_qiita" className="flex items-center gap-2">
+                    <span className="text-base">📗</span>
+                    Qiita
+                  </Label>
+                  <Input
+                    id="social_qiita"
+                    placeholder="https://qiita.com/username"
+                    defaultValue="https://qiita.com/mokosau"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="social_izanami" className="flex items-center gap-2">
+                    <span className="text-base">🔮</span>
+                    Izanami
+                  </Label>
+                  <Input
+                    id="social_izanami"
+                    placeholder="https://izanami.example.com/username"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                ℹ️ 空欄のSNSリンクはヘッダーに表示されません
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Contact Information */}
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-heading">連絡先</CardTitle>
+              <CardTitle className="font-heading">その他の連絡先</CardTitle>
               <CardDescription>
-                SNSやその他の連絡先情報
+                メールアドレスやその他の連絡先情報
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -158,26 +275,10 @@ export default function AdminProfilePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="twitter">Twitter / X</Label>
-                  <Input
-                    id="twitter"
-                    placeholder="https://twitter.com/username"
-                  />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
                   <Label htmlFor="linkedin">LinkedIn</Label>
                   <Input
                     id="linkedin"
                     placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <Input
-                    id="instagram"
-                    placeholder="https://instagram.com/username"
                   />
                 </div>
               </div>
