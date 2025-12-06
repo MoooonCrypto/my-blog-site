@@ -113,14 +113,14 @@ export default function AdminDashboardPage() {
           <Card className="card-hover border-border/50 animate-fade-in-up opacity-0 delay-400">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="font-heading text-lg">Profile</CardTitle>
+                <CardTitle className="font-heading text-lg">Profile & SNS</CardTitle>
                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                   <User className="h-5 w-5" />
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">プロフィール設定</p>
+              <p className="text-sm text-muted-foreground mb-4">プロフィール・SNSリンク設定</p>
               <Button asChild variant="ghost" size="sm" className="w-full group">
                 <Link href="/admin/profile">
                   編集
