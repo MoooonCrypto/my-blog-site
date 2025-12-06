@@ -1,7 +1,7 @@
 import React from "react";
 
 interface SocialIconProps {
-  platform: "x" | "instagram" | "tiktok" | "youtube" | "note" | "zenn" | "qiita" | "izanami";
+  platform: "x" | "instagram" | "tiktok" | "youtube" | "note" | "zenn" | "qiita";
   href: string;
   className?: string;
 }
@@ -44,10 +44,6 @@ export const SocialIcon: React.FC<SocialIconProps> = ({ platform, href, classNam
       case "qiita":
         return (
           <span className="text-sm font-bold">q</span>
-        );
-      case "izanami":
-        return (
-          <span className="text-sm font-bold">i</span>
         );
       default:
         return null;

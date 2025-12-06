@@ -15,7 +15,6 @@ const socialLinks = {
   note: "https://note.com/mokosau",
   zenn: "https://zenn.dev/mokosau",
   qiita: "https://qiita.com/mokosau",
-  izanami: "",
 };
 
 export const Header = () => {
@@ -48,7 +47,6 @@ export const Header = () => {
           <SocialIcon platform="note" href={socialLinks.note} />
           <SocialIcon platform="zenn" href={socialLinks.zenn} />
           <SocialIcon platform="qiita" href={socialLinks.qiita} />
-          {socialLinks.izanami && <SocialIcon platform="izanami" href={socialLinks.izanami} />}
         </div>
 
         {/* Navigation */}
@@ -85,7 +83,6 @@ export const Header = () => {
             <SocialIcon platform="note" href={socialLinks.note} />
             <SocialIcon platform="zenn" href={socialLinks.zenn} />
             <SocialIcon platform="qiita" href={socialLinks.qiita} />
-            {socialLinks.izanami && <SocialIcon platform="izanami" href={socialLinks.izanami} />}
           </div>
         </div>
       </div>
