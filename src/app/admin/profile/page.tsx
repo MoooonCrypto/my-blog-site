@@ -210,28 +210,16 @@ export default function AdminProfilePage() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="social_qiita" className="flex items-center gap-2">
-                    <span className="text-base">📗</span>
-                    Qiita
-                  </Label>
-                  <Input
-                    id="social_qiita"
-                    placeholder="https://qiita.com/username"
-                    defaultValue="https://qiita.com/mokosau"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="social_izanami" className="flex items-center gap-2">
-                    <span className="text-base">🔮</span>
-                    Izanami
-                  </Label>
-                  <Input
-                    id="social_izanami"
-                    placeholder="https://izanami.example.com/username"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="social_qiita" className="flex items-center gap-2">
+                  <span className="text-base">📗</span>
+                  Qiita
+                </Label>
+                <Input
+                  id="social_qiita"
+                  placeholder="https://qiita.com/username"
+                  defaultValue="https://qiita.com/mokosau"
+                />
               </div>
 
               <p className="text-xs text-muted-foreground">

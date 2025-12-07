@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Briefcase, Code2, FileText, User, TrendingUp } from "lucide-react";
+import { Briefcase, Code2, FileText, User, TrendingUp, LogOut } from "lucide-react";
 
 // Dummy data for the dashboard
 const contentSummary = {
@@ -31,12 +32,25 @@ export default function AdminDashboardPage() {
 
       <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-8 md:mb-12 animate-fade-in-up opacity-0">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-2">
-            管理ダッシュボード
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            コンテンツを管理し、サイトを更新します
-          </p>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-2">
+                管理ダッシュボード
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground">
+                コンテンツを管理し、サイトを更新します
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="gap-2 flex-shrink-0"
+            >
+              <LogOut className="h-4 w-4" />
+              ログアウト
+            </Button>
+          </div>
         </header>
 
         {/* Quick Stats */}
