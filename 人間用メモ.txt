@@ -1,0 +1,19 @@
+
+・DB実装完了後、必ずセキュリティ監査
+→システム側でのチェックだけでなく、supabase管理画面での設定の黙示確認なども含めて、
+必要な作業を洗い出し、テストを徹底的に行う。
+-----
+Authentication > URL Configuration
+・redirect urlが設定されていない
+Database > Replication
+primary databaseという部品みたいなものから、iceberg-3table,BigQuery-5tableに線が伸びている
+
+ Project Settings > API
+ ・Publishable key、Secret keysが表示されている
+
+  Project Settings > General
+  ・特に設定されていなさそう
+
+  ----------
+
+ 

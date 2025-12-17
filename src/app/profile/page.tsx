@@ -1,3 +1,4 @@
+import Image from "next/image";
 
 const dummyProfile = {
   name: "Jules",
@@ -29,10 +30,13 @@ export default function ProfilePage() {
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-col sm:flex-row items-center gap-8 mb-12">
-          <img
+          <Image
             src={profile.avatar_url}
             alt={profile.name}
+            width={150}
+            height={150}
             className="w-32 h-32 rounded-full border-4 border-primary"
+            priority={true}
           />
           <div>
             <h1 className="text-4xl font-bold tracking-tighter">{profile.name}</h1>
