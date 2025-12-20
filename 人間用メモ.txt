@@ -16,4 +16,76 @@ primary databaseという部品みたいなものから、iceberg-3table,BigQuer
 
   ----------
 
+--bk20251218--
+
+{
+  "permissions": {
+    "deny": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(git config:*)",
+      "Bash(sudo:*)",
+      "Bash(sudo *)",
+      "Bash(rm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -r:*)",
+      "Bash(rm -f:*)",
+      "Bash(rm -R:*)",
+      "Bash(rm --recursive:*)",
+      "Bash(rm --force:*)",
+      "Bash(rmdir:*)",
+      "Bash(find * -delete:*)",
+      "Bash(find * -exec rm:*)",
+      "Bash(xargs rm:*)",
+      "Bash(npm run dev)",
+      "Bash(npm run dev:*)",
+      "Bash(*npm run dev*)",
+      "Bash(npm start)",
+      "Bash(npm start:*)",
+      "Bash(*npm start*)",
+      "Bash(yarn dev)",
+      "Bash(yarn dev:*)",
+      "Bash(*yarn dev*)",
+      "Bash(yarn start)",
+      "Bash(yarn start:*)",
+      "Bash(*yarn start*)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm dev:*)",
+      "Bash(*pnpm dev*)",
+      "Bash(pnpm start)",
+      "Bash(pnpm start:*)",
+      "Bash(*pnpm start*)",
+      "Bash(npm install:*)",
+      "Bash(npm install *)",
+      "Bash(npm i:*)",
+      "Bash(npm i *)",
+      "Bash(npm run build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run test)",
+      "Bash(npm run test:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(yarn install:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn build:*)",
+      "Bash(yarn test:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(chmod 777:*)",
+      "Bash(chown:*)",
+      "Bash(curl * | sh:*)",
+      "Bash(curl * | bash:*)",
+      "Bash(wget * | sh:*)",
+      "Bash(wget * | bash:*)"
+    ]
+  }
+}
+
  

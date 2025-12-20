@@ -129,9 +129,27 @@ export type Database = {
           experience: Json | null
           github_url: string | null
           id: string
+          is_admin: boolean | null
           linkedin_url: string | null
           name: string
           skills: Json | null
+          social_instagram_icon_url: string | null
+          social_instagram_url: string | null
+          social_note_icon_url: string | null
+          social_note_url: string | null
+          social_other_icon_url: string | null
+          social_other_url: string | null
+          social_qiita_icon_url: string | null
+          social_qiita_url: string | null
+          social_tiktok_icon_url: string | null
+          social_tiktok_url: string | null
+          social_x_icon_url: string | null
+          social_x_url: string | null
+          social_youtube_icon_url: string | null
+          social_youtube_url: string | null
+          social_zenn_icon_url: string | null
+          social_zenn_url: string | null
+          title: string | null
           twitter_url: string | null
           updated_at: string | null
           website_url: string | null
@@ -145,9 +163,27 @@ export type Database = {
           experience?: Json | null
           github_url?: string | null
           id?: string
+          is_admin?: boolean | null
           linkedin_url?: string | null
           name: string
           skills?: Json | null
+          social_instagram_icon_url?: string | null
+          social_instagram_url?: string | null
+          social_note_icon_url?: string | null
+          social_note_url?: string | null
+          social_other_icon_url?: string | null
+          social_other_url?: string | null
+          social_qiita_icon_url?: string | null
+          social_qiita_url?: string | null
+          social_tiktok_icon_url?: string | null
+          social_tiktok_url?: string | null
+          social_x_icon_url?: string | null
+          social_x_url?: string | null
+          social_youtube_icon_url?: string | null
+          social_youtube_url?: string | null
+          social_zenn_icon_url?: string | null
+          social_zenn_url?: string | null
+          title?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
@@ -161,9 +197,27 @@ export type Database = {
           experience?: Json | null
           github_url?: string | null
           id?: string
+          is_admin?: boolean | null
           linkedin_url?: string | null
           name?: string
           skills?: Json | null
+          social_instagram_icon_url?: string | null
+          social_instagram_url?: string | null
+          social_note_icon_url?: string | null
+          social_note_url?: string | null
+          social_other_icon_url?: string | null
+          social_other_url?: string | null
+          social_qiita_icon_url?: string | null
+          social_qiita_url?: string | null
+          social_tiktok_icon_url?: string | null
+          social_tiktok_url?: string | null
+          social_x_icon_url?: string | null
+          social_x_url?: string | null
+          social_youtube_icon_url?: string | null
+          social_youtube_url?: string | null
+          social_zenn_icon_url?: string | null
+          social_zenn_url?: string | null
+          title?: string | null
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null

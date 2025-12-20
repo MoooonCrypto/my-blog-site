@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +14,148 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { ArrowLeft, User, Save, Share2 } from "lucide-react";
+import type { Profile } from "@/lib/api/profile";
 
 export default function AdminProfilePage() {
+  const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    title: "",
+    bio: "",
+    avatar_url: "",
+    email: "",
+    website_url: "",
+    github_url: "",
+    linkedin_url: "",
+    social_x_url: "",
+    social_x_icon_url: "",
+    social_instagram_url: "",
+    social_instagram_icon_url: "",
+    social_tiktok_url: "",
+    social_tiktok_icon_url: "",
+    social_youtube_url: "",
+    social_youtube_icon_url: "",
+    social_note_url: "",
+    social_note_icon_url: "",
+    social_zenn_url: "",
+    social_zenn_icon_url: "",
+    social_qiita_url: "",
+    social_qiita_icon_url: "",
+    social_other_url: "",
+    social_other_icon_url: "",
+  });
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch("/api/admin/profile");
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data);
+        setFormData({
+          name: data.name || "",
+          title: data.title || "",
+          bio: data.bio || "",
+          avatar_url: data.avatar_url || "",
+          email: data.email || "",
+          website_url: data.website_url || "",
+          github_url: data.github_url || "",
+          linkedin_url: data.linkedin_url || "",
+          social_x_url: data.social_x_url || "",
+          social_x_icon_url: data.social_x_icon_url || "",
+          social_instagram_url: data.social_instagram_url || "",
+          social_instagram_icon_url: data.social_instagram_icon_url || "",
+          social_tiktok_url: data.social_tiktok_url || "",
+          social_tiktok_icon_url: data.social_tiktok_icon_url || "",
+          social_youtube_url: data.social_youtube_url || "",
+          social_youtube_icon_url: data.social_youtube_icon_url || "",
+          social_note_url: data.social_note_url || "",
+          social_note_icon_url: data.social_note_icon_url || "",
+          social_zenn_url: data.social_zenn_url || "",
+          social_zenn_icon_url: data.social_zenn_icon_url || "",
+          social_qiita_url: data.social_qiita_url || "",
+          social_qiita_icon_url: data.social_qiita_icon_url || "",
+          social_other_url: data.social_other_url || "",
+          social_other_icon_url: data.social_other_icon_url || "",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    // Simulate save
-    setTimeout(() => {
+
+    try {
+      // バリデーション: 氏名は必須
+      if (!formData.name || formData.name.trim() === "") {
+        alert("氏名は必須です");
+        setIsSaving(false);
+        return;
+      }
+
+      // 空文字列をnullに変換（データベースで明示的に削除するため）
+      const dataToSend = Object.fromEntries(
+        Object.entries(formData).map(([key, value]) => [
+          key,
+          value === "" ? null : value,
+        ])
+      );
+
+      const response = await fetch("/api/admin/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (response.ok) {
+        alert("プロフィールを保存しました");
+        // ダッシュボードにリダイレクト
+        router.push("/admin/dashboard");
+      } else {
+        const error = await response.json();
+        alert(`エラー: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("保存に失敗しました");
+    } finally {
       setIsSaving(false);
-      alert("プロフィールを保存しました");
-    }, 1000);
+    }
   };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center">読み込み中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -68,19 +197,24 @@ export default function AdminProfilePage() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">名前</Label>
+                  <Label htmlFor="name">
+                    名前 <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="name"
                     placeholder="山田太郎"
-                    defaultValue="Mokosau"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">役職・肩書き</Label>
+                  <Label htmlFor="title">役職・肩書き</Label>
                   <Input
-                    id="role"
+                    id="title"
                     placeholder="Full-Stack Developer"
-                    defaultValue="Full-Stack Developer"
+                    value={formData.title}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -90,7 +224,8 @@ export default function AdminProfilePage() {
                   id="bio"
                   placeholder="あなたについて簡単に説明してください"
                   rows={4}
-                  defaultValue="プログラミングとデザインが好きなフルスタックエンジニアです。"
+                  value={formData.bio}
+                  onChange={handleChange}
                 />
               </div>
             </CardContent>
@@ -105,21 +240,14 @@ export default function AdminProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-6">
-                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <User className="h-12 w-12 text-muted-foreground" />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="avatar">画像URL</Label>
-                  <Input
-                    id="avatar"
-                    placeholder="https://example.com/avatar.jpg"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    推奨サイズ: 400x400px以上
-                  </p>
-                </div>
-              </div>
+              <ImageUpload
+                id="avatar_url"
+                label="プロフィール画像"
+                currentImageUrl={formData.avatar_url}
+                onImageUploaded={(url) => setFormData(prev => ({ ...prev, avatar_url: url }))}
+                folder="avatars"
+                previewClassName="w-32 h-32 rounded-full"
+              />
             </CardContent>
           </Card>
 
@@ -135,95 +263,248 @@ export default function AdminProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="social_x" className="flex items-center gap-2">
-                    <span className="text-base">𝕏</span>
-                    X (Twitter)
-                  </Label>
-                  <Input
-                    id="social_x"
-                    placeholder="https://twitter.com/username"
-                    defaultValue="https://twitter.com/mokosau"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="social_instagram" className="flex items-center gap-2">
-                    <span className="text-base">📷</span>
-                    Instagram
-                  </Label>
-                  <Input
-                    id="social_instagram"
-                    placeholder="https://instagram.com/username"
-                    defaultValue="https://instagram.com/mokosau"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="social_tiktok" className="flex items-center gap-2">
-                    <span className="text-base">🎵</span>
-                    TikTok
-                  </Label>
-                  <Input
-                    id="social_tiktok"
-                    placeholder="https://tiktok.com/@username"
-                    defaultValue="https://tiktok.com/@mokosau"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="social_youtube" className="flex items-center gap-2">
-                    <span className="text-base">▶️</span>
-                    YouTube
-                  </Label>
-                  <Input
-                    id="social_youtube"
-                    placeholder="https://youtube.com/@username"
-                    defaultValue="https://youtube.com/@mokosau"
-                  />
+              {/* X (Twitter) */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">𝕏</span>
+                  X (Twitter)
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_x_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_x_url"
+                      placeholder="https://twitter.com/username"
+                      value={formData.social_x_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_x_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_x_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_x_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="social_note" className="flex items-center gap-2">
-                    <span className="text-base">📝</span>
-                    note
-                  </Label>
-                  <Input
-                    id="social_note"
-                    placeholder="https://note.com/username"
-                    defaultValue="https://note.com/mokosau"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="social_zenn" className="flex items-center gap-2">
-                    <span className="text-base">📘</span>
-                    Zenn
-                  </Label>
-                  <Input
-                    id="social_zenn"
-                    placeholder="https://zenn.dev/username"
-                    defaultValue="https://zenn.dev/mokosau"
-                  />
+              {/* Instagram */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">📷</span>
+                  Instagram
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_instagram_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_instagram_url"
+                      placeholder="https://instagram.com/username"
+                      value={formData.social_instagram_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_instagram_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_instagram_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_instagram_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="social_qiita" className="flex items-center gap-2">
+              {/* TikTok */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">🎵</span>
+                  TikTok
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_tiktok_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_tiktok_url"
+                      placeholder="https://tiktok.com/@username"
+                      value={formData.social_tiktok_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_tiktok_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_tiktok_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_tiktok_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* YouTube */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">▶️</span>
+                  YouTube
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_youtube_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_youtube_url"
+                      placeholder="https://youtube.com/@username"
+                      value={formData.social_youtube_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_youtube_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_youtube_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_youtube_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* note */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">📝</span>
+                  note
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_note_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_note_url"
+                      placeholder="https://note.com/username"
+                      value={formData.social_note_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_note_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_note_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_note_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Zenn */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">📘</span>
+                  Zenn
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_zenn_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_zenn_url"
+                      placeholder="https://zenn.dev/username"
+                      value={formData.social_zenn_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_zenn_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_zenn_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_zenn_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Qiita */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
                   <span className="text-base">📗</span>
                   Qiita
                 </Label>
-                <Input
-                  id="social_qiita"
-                  placeholder="https://qiita.com/username"
-                  defaultValue="https://qiita.com/mokosau"
-                />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_qiita_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_qiita_url"
+                      placeholder="https://qiita.com/username"
+                      value={formData.social_qiita_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_qiita_icon_url"
+                      label="アイコン画像 (オプション)"
+                      currentImageUrl={formData.social_qiita_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_qiita_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Other */}
+              <div className="space-y-2 p-4 border rounded-lg">
+                <Label className="flex items-center gap-2 font-semibold">
+                  <span className="text-base">🔗</span>
+                  その他
+                </Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_other_url" className="text-sm">URL</Label>
+                    <Input
+                      id="social_other_url"
+                      placeholder="https://example.com/yoursite"
+                      value={formData.social_other_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <ImageUpload
+                      id="social_other_icon_url"
+                      label="アイコン画像 (必須)"
+                      currentImageUrl={formData.social_other_icon_url}
+                      onImageUploaded={(url) => setFormData(prev => ({ ...prev, social_other_icon_url: url }))}
+                      folder="sns-icons"
+                      previewClassName="w-16 h-16"
+                      showPreview={true}
+                    />
+                  </div>
+                </div>
               </div>
 
               <p className="text-xs text-muted-foreground">
-                ℹ️ 空欄のSNSリンクはヘッダーに表示されません
+                ℹ️ URLが空欄のSNSはヘッダーに表示されません。アイコン画像URLが空欄の場合はデフォルトアイコンが使用されます。
               </p>
             </CardContent>
           </Card>
@@ -244,29 +525,37 @@ export default function AdminProfilePage() {
                     id="email"
                     type="email"
                     placeholder="contact@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="website">ウェブサイト</Label>
+                  <Label htmlFor="website_url">ウェブサイト</Label>
                   <Input
-                    id="website"
+                    id="website_url"
                     placeholder="https://example.com"
+                    value={formData.website_url}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="github">GitHub</Label>
+                  <Label htmlFor="github_url">GitHub</Label>
                   <Input
-                    id="github"
+                    id="github_url"
                     placeholder="https://github.com/username"
+                    value={formData.github_url}
+                    onChange={handleChange}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Label htmlFor="linkedin_url">LinkedIn</Label>
                   <Input
-                    id="linkedin"
+                    id="linkedin_url"
                     placeholder="https://linkedin.com/in/username"
+                    value={formData.linkedin_url}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
