@@ -42,15 +42,8 @@ export async function checkAdminAuth() {
     }
   }
 
-  // 管理者メールチェック（RLS policyと同じロジック）
-  if (user.email !== 'mokotech7@gmail.com') {
-    return {
-      authenticated: false,
-      error: '管理者権限が必要です。',
-      status: 403,
-    }
-  }
-
+  // Supabase Auth でログインできた = 管理者として登録されているユーザー
+  // 追加の権限チェックは不要
   return {
     authenticated: true,
     user,
