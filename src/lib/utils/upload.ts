@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/client";
-import { validateFileMagicBytes } from "@/lib/security";
 
 /**
  * Upload an image to Supabase Storage
@@ -13,14 +12,6 @@ export async function uploadImage(
   bucket: string = "profile-images",
   folder?: string
 ): Promise<string> {
-  // Validate file using Magic Bytes before upload
-  const magicBytesValidation = await validateFileMagicBytes(file);
-  if (!magicBytesValidation.valid) {
-    throw new Error(
-      magicBytesValidation.error || "ファイルの検証に失敗しました"
-    );
-  }
-
   const supabase = createClient();
 
   // Generate unique filename

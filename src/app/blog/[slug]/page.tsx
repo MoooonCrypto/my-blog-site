@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getBlogPostBySlug } from "@/lib/api/blog";
 import { Calendar, ArrowLeft } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
 
 export const dynamic = "force-dynamic";
 
@@ -107,14 +106,7 @@ export default async function BlogPostPage({
           {post.content && (
             <div
               className="prose prose-lg dark:prose-invert max-w-none mb-12 animate-fade-in-up opacity-0 delay-300"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(post.content, {
-                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                                 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre', 'span', 'div'],
-                  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id'],
-                  ALLOW_DATA_ATTR: false
-                })
-              }}
+              dangerouslySetInnerHTML={{ __html: post.content }}
             />
           )}
 

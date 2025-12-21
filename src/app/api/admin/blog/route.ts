@@ -1,26 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createBlogPost } from "@/lib/api/blog";
 import { checkAdminAuth } from "@/lib/auth-check";
-import {
-  validateSlug,
-  formatErrorMessage,
-  validateOrigin,
-  sanitizeInput,
-} from "@/lib/security";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // CSRF対策: Originヘッダーチェック
-    const originValidation = validateOrigin(request);
-    if (!originValidation.valid) {
-      return NextResponse.json(
-        { error: originValidation.error },
-        { status: 403 }
-      );
-    }
-
     // 認証チェック
     const authResult = await checkAdminAuth();
     if (!authResult.authenticated) {
@@ -49,11 +34,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Slugのサーバーサイドバリデーション
-    const slugValidation = validateSlug(data.slug);
-    if (!slugValidation.valid) {
+    if (!data.slug || data.slug.trim() === "") {
       return NextResponse.json(
-        { error: slugValidation.error },
+        { error: "スラッグは必須です。" },
         { status: 400 }
       );
     }
@@ -65,20 +48,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize title and excerpt to prevent XSS
-    data.title = sanitizeInput(data.title);
-    if (data.excerpt) {
-      data.excerpt = sanitizeInput(data.excerpt);
-    }
-    // Use validated/sanitized slug
-    data.slug = slugValidation.sanitized;
-
     // データベースに保存
     const post = await createBlogPost(data);
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    // エラーメッセージの詳細化（開発環境のみ）
     if (error instanceof Error) {
       // 重複エラーの検出
       if (error.message.includes("duplicate") || error.message.includes("unique")) {
@@ -88,12 +62,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // 本番環境では詳細なエラーを隠す
-      const errorMessage = formatErrorMessage(
-        error,
-        "記事の作成に失敗しました"
+      return NextResponse.json(
+        { error: `記事の作成に失敗しました: ${error.message}` },
+        { status: 500 }
       );
-      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 
     return NextResponse.json(

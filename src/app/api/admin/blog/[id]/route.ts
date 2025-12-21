@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteBlogPost, getBlogPostById, updateBlogPost } from "@/lib/api/blog";
 import { checkAdminAuth } from "@/lib/auth-check";
-import {
-  validateSlug,
-  formatErrorMessage,
-  validateOrigin,
-  sanitizeInput,
-} from "@/lib/security";
 
 export const dynamic = 'force-dynamic';
 
@@ -56,15 +50,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // CSRF対策
-    const originValidation = validateOrigin(request);
-    if (!originValidation.valid) {
-      return NextResponse.json(
-        { error: originValidation.error },
-        { status: 403 }
-      );
-    }
-
     // 認証チェック
     const authResult = await checkAdminAuth();
     if (!authResult.authenticated) {
@@ -93,16 +78,11 @@ export async function PUT(
       );
     }
 
-    // Slugのバリデーション
-    if (data.slug !== undefined) {
-      const slugValidation = validateSlug(data.slug);
-      if (!slugValidation.valid) {
-        return NextResponse.json(
-          { error: slugValidation.error },
-          { status: 400 }
-        );
-      }
-      data.slug = slugValidation.sanitized;
+    if (data.slug !== undefined && data.slug.trim() === "") {
+      return NextResponse.json(
+        { error: "スラッグは必須です。" },
+        { status: 400 }
+      );
     }
 
     if (data.content !== undefined && data.content.trim() === "") {
@@ -112,19 +92,13 @@ export async function PUT(
       );
     }
 
-    // Sanitize inputs
-    if (data.title) {
-      data.title = sanitizeInput(data.title);
-    }
-    if (data.excerpt) {
-      data.excerpt = sanitizeInput(data.excerpt);
-    }
-
     // データベースを更新
     const post = await updateBlogPost(params.id, data);
 
     return NextResponse.json(post);
   } catch (error) {
+    console.error("Error updating blog post:", error);
+
     if (error instanceof Error) {
       // 重複エラーの検出
       if (error.message.includes("duplicate") || error.message.includes("unique")) {
@@ -142,8 +116,10 @@ export async function PUT(
         );
       }
 
-      const errorMessage = formatErrorMessage(error, "記事の更新に失敗しました");
-      return NextResponse.json({ error: errorMessage }, { status: 500 });
+      return NextResponse.json(
+        { error: `記事の更新に失敗しました: ${error.message}` },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
@@ -158,15 +134,6 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // CSRF対策
-    const originValidation = validateOrigin(request);
-    if (!originValidation.valid) {
-      return NextResponse.json(
-        { error: originValidation.error },
-        { status: 403 }
-      );
-    }
-
     // 認証チェック
     const authResult = await checkAdminAuth();
     if (!authResult.authenticated) {
@@ -180,6 +147,8 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "記事を削除しました。" });
   } catch (error) {
+    console.error("Error deleting blog post:", error);
+
     if (error instanceof Error && error.message.includes("not found")) {
       return NextResponse.json(
         { error: "記事が見つかりませんでした。" },
@@ -187,7 +156,9 @@ export async function DELETE(
       );
     }
 
-    const errorMessage = formatErrorMessage(error, "記事の削除に失敗しました");
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { error: "記事の削除に失敗しました。もう一度お試しください。" },
+      { status: 500 }
+    );
   }
 }
