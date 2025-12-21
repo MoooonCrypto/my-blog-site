@@ -13,7 +13,7 @@ export async function validateFileMagicBytes(
     const bytes = new Uint8Array(arrayBuffer);
 
     // Magic bytes signatures for common image formats
-    const signatures: Record<string, { bytes: number[][]; type: string }> = {
+    const signatures: Record<string, { bytes: (number | null)[][]; type: string }> = {
       jpeg: {
         bytes: [[0xff, 0xd8, 0xff]],
         type: "image/jpeg",
