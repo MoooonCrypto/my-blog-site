@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getProfile, updateProfile } from "@/lib/api/profile";
 import { checkAdminAuth } from "@/lib/auth-check";
+import {
+  formatErrorMessage,
+  validateOrigin,
+  sanitizeInput,
+} from "@/lib/security";
 
 export async function GET() {
   try {
@@ -26,7 +31,16 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    // 認証チェック（既存のパターンに合わせる）
+    // CSRF対策
+    const originValidation = validateOrigin(request);
+    if (!originValidation.valid) {
+      return NextResponse.json(
+        { error: originValidation.error },
+        { status: 403 }
+      );
+    }
+
+    // 認証チェック
     const authResult = await checkAdminAuth();
     if (!authResult.authenticated) {
       return NextResponse.json(
@@ -36,7 +50,6 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log("Received profile update request:", body);
 
     // バリデーション: 氏名は必須
     if (!body.name || body.name.trim() === "") {
@@ -46,9 +59,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Sanitize user inputs
+    if (body.name) body.name = sanitizeInput(body.name);
+    if (body.title) body.title = sanitizeInput(body.title);
+    if (body.bio) body.bio = sanitizeInput(body.bio);
+
     // Get current profile to find the ID
     const currentProfile = await getProfile();
-    console.log("Current profile ID:", currentProfile?.id);
 
     if (!currentProfile) {
       return NextResponse.json(
@@ -59,7 +76,6 @@ export async function PUT(request: NextRequest) {
 
     // Update profile
     const updatedProfile = await updateProfile(currentProfile.id, body);
-    console.log("Profile updated successfully:", updatedProfile);
 
     // プロフィールページのキャッシュを無効化
     revalidatePath("/profile");
@@ -67,10 +83,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedProfile);
   } catch (error: any) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update profile" },
-      { status: 500 }
+    const errorMessage = formatErrorMessage(
+      error,
+      "プロフィールの更新に失敗しました"
     );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

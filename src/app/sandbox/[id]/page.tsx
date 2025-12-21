@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getSandboxItemById } from "@/lib/api/sandbox";
 import { ExternalLink, Github, Calendar, ArrowLeft, Sparkles } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,14 @@ export default async function SandboxDetailPage({
           {project.content && (
             <div
               className="prose prose-lg dark:prose-invert max-w-none mb-8 animate-fade-in-up opacity-0 delay-300"
-              dangerouslySetInnerHTML={{ __html: project.content }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(project.content, {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                                 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre', 'span', 'div'],
+                  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id'],
+                  ALLOW_DATA_ATTR: false
+                })
+              }}
             />
           )}
 

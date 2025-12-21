@@ -17,11 +17,9 @@ export async function getProfile() {
     .single()
 
   if (error) {
-    console.error("Error fetching profile:", error)
     throw error
   }
 
-  console.log("Fetched profile:", data)
   return data
 }
 
@@ -47,8 +45,6 @@ export async function getProfileById(id: string) {
 export async function updateProfile(id: string, profile: ProfileUpdate) {
   const supabase = await createClient()
 
-  console.log("Updating profile with ID:", id, "Data:", profile)
-
   const { data, error } = await supabase
     .from('profiles')
     .update(profile)
@@ -57,10 +53,8 @@ export async function updateProfile(id: string, profile: ProfileUpdate) {
     .single()
 
   if (error) {
-    console.error("Error updating profile in DB:", error)
     throw error
   }
 
-  console.log("Profile updated in DB:", data)
   return data
 }
