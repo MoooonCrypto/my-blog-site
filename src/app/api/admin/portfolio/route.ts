@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPortfolioItem } from "@/lib/api/portfolio";
 import { checkAdminAuth } from "@/lib/auth-check";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // 認証チェック

@@ -8,6 +8,8 @@ import {
   sanitizeInput,
 } from "@/lib/security";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const profile = await getProfile();

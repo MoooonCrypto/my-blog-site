@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { deleteSandboxItem, getSandboxItemById, updateSandboxItem } from "@/lib/api/sandbox";
 import { checkAdminAuth } from "@/lib/auth-check";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
