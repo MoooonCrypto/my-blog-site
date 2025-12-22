@@ -70,9 +70,5 @@
                                     
 
 -----次回ここから再開プロンプト-----
-> - XSS対策: DOMPurify を導入して dangerouslySetInnerHTML を安全化                                                                                     
-  - /src/app/admin/page.tsx を削除                                                                                                                     
-  - 全 console.log を削除                                                                                                                              
-  - セキュリティヘッダーを next.config.mjs に追加                                                                                                                                                                                                                                                        
-この方向で進めて     
+portfolio画面で表示しているように、sandboxとprof画面でも設定画像をプレビュー表示して。
 ---------------------------------

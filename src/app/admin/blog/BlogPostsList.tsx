@@ -83,6 +83,12 @@ export default function BlogPostsList({ initialPosts }: BlogPostsListProps) {
             >
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
+                  {post.featured_image && (
+                    <div
+                      className="w-24 h-24 rounded-lg overflow-hidden border border-border/50 flex-shrink-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${post.featured_image})` }}
+                    />
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="font-heading text-lg truncate">
