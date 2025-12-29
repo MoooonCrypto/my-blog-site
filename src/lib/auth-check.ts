@@ -32,8 +32,19 @@ export async function checkAdminAuth() {
 
   const {
     data: { user },
+    error
   } = await supabase.auth.getUser()
 
+  // エラーが発生した場合は必ず認証失敗として扱う
+  if (error) {
+    return {
+      authenticated: false,
+      error: '認証に失敗しました。',
+      status: 401,
+    }
+  }
+
+  // ユーザーが存在しない場合も認証失敗
   if (!user) {
     return {
       authenticated: false,

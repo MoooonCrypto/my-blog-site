@@ -18,12 +18,10 @@ export default async function AdminDashboardPage() {
 
     // エラーがある、またはユーザーが存在しない場合は必ずログインページへ
     if (error || !user) {
-      console.error("[Dashboard] Unauthorized access blocked:", error?.message || "No user");
       redirect("/admin/login");
     }
   } catch (error) {
     // 予期しない例外が発生した場合も必ず拒否
-    console.error("[Dashboard] Auth check failed:", error);
     redirect("/admin/login");
   }
 

@@ -7,6 +7,15 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    // 認証チェック
+    const authResult = await checkAdminAuth();
+    if (!authResult.authenticated) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
+    }
+
     const profile = await getProfile();
 
     if (!profile) {

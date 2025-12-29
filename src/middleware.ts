@@ -21,7 +21,6 @@ export async function middleware(request: NextRequest) {
   try {
     // 【フェイルセーフ1】環境変数の検証
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('[Middleware] CRITICAL: Supabase environment variables are not set')
       const loginUrl = new URL('/admin/login', nextUrl.origin)
       loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
       loginUrl.searchParams.set('error', 'config')
@@ -59,7 +58,6 @@ export async function middleware(request: NextRequest) {
 
     // エラーがある場合は必ず認証失敗として扱う
     if (error) {
-      console.error('[Middleware] Auth error:', error.message)
       const loginUrl = new URL('/admin/login', nextUrl.origin)
       loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
       return NextResponse.redirect(loginUrl)
@@ -67,7 +65,6 @@ export async function middleware(request: NextRequest) {
 
     // 【フェイルセーフ3】userが存在しない場合も認証失敗
     if (!user) {
-      console.warn('[Middleware] No user found')
       const loginUrl = new URL('/admin/login', nextUrl.origin)
       loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
       return NextResponse.redirect(loginUrl)
@@ -78,7 +75,6 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     // 【フェイルセーフ4】予期しない例外が発生した場合も必ず拒否
-    console.error('[Middleware] Unexpected error:', error)
     const loginUrl = new URL('/admin/login', nextUrl.origin)
     loginUrl.searchParams.set('callbackUrl', nextUrl.pathname)
     loginUrl.searchParams.set('error', 'unexpected')
