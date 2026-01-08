@@ -253,7 +253,7 @@ export default function BlogPostForm({ initialData }: BlogPostFormProps) {
                 required: "本文は必須です",
                 minLength: { value: 10, message: "本文は10文字以上入力してください" }
               })}
-              placeholder="記事の本文をMarkdownで記述してください..."
+              placeholder="記事の本文を入力してください（改行はそのまま反映されます）..."
               rows={20}
               className="font-mono text-sm"
               disabled={isSubmitting}
