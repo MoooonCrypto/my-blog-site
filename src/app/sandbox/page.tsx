@@ -44,9 +44,21 @@ export default async function SandboxPage() {
             {projects.map((project, index) => (
               <Card
                 key={project.id}
-                className="card-hover border-border/50 flex flex-col animate-fade-in-up opacity-0"
+                className="card-hover border-border/50 flex flex-col overflow-hidden animate-fade-in-up opacity-0"
                 style={{ animationDelay: `${Math.min(index * 100, 500)}ms` }}
               >
+                {/* Thumbnail */}
+                {project.featured_image && (
+                  <div className="relative h-48 overflow-hidden bg-muted">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 hover:scale-110"
+                      style={{
+                        backgroundImage: `url(${project.featured_image})`,
+                      }}
+                    />
+                  </div>
+                )}
+
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <CardTitle className="font-heading text-lg flex-1">

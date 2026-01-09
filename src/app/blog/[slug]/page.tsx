@@ -105,7 +105,7 @@ export default async function BlogPostPage({
           {/* Content */}
           {post.content && (
             <div
-              className="prose prose-lg dark:prose-invert max-w-none mb-12 animate-fade-in-up opacity-0 delay-300"
+              className="prose prose-lg dark:prose-invert max-w-none mb-12 animate-fade-in-up opacity-0 delay-300 whitespace-pre-wrap"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           )}

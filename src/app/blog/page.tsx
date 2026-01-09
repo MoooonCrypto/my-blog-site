@@ -39,9 +39,21 @@ export default async function BlogPage() {
             {posts.map((post, index) => (
               <Card
                 key={post.slug}
-                className="card-hover border-border/50 flex flex-col animate-fade-in-up opacity-0"
+                className="card-hover border-border/50 flex flex-col overflow-hidden animate-fade-in-up opacity-0"
                 style={{ animationDelay: `${Math.min(index * 100, 500)}ms` }}
               >
+                {/* Thumbnail */}
+                {post.featured_image && (
+                  <div className="relative h-48 overflow-hidden bg-muted">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 hover:scale-110"
+                      style={{
+                        backgroundImage: `url(${post.featured_image})`,
+                      }}
+                    />
+                  </div>
+                )}
+
                 <CardHeader>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                     <Calendar className="h-3 w-3" />
