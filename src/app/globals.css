@@ -84,8 +84,17 @@
   * {
     @apply border-border;
   }
+
+  html {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
