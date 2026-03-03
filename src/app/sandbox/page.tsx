@@ -93,12 +93,17 @@ export default async function SandboxPage() {
                 </CardContent>
 
                 <CardFooter className="flex gap-2">
-                  {project.demo_url && (
+                  {project.demo_url ? (
                     <Button asChild variant="default" size="sm" className="flex-1 group">
                       <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
                         アプリへ
                         <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                       </a>
+                    </Button>
+                  ) : (
+                    <Button variant="default" size="sm" className="flex-1" disabled>
+                      アプリへ
+                      <ExternalLink className="ml-2 h-3 w-3" />
                     </Button>
                   )}
                   {project.github_url && (
