@@ -44,7 +44,9 @@ export default async function Home() {
                 {recentPortfolio.map((project, index) => (
                   <Link
                     key={project.id}
-                    href={`/portfolio/${project.id}`}
+                    href={project.demo_url ?? "/portfolio"}
+                    target={project.demo_url ? "_blank" : undefined}
+                    rel={project.demo_url ? "noopener noreferrer" : undefined}
                     className={`group flex-shrink-0 snap-start animate-fade-in-up opacity-0`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >

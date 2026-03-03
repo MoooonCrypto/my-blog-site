@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Briefcase, ExternalLink, Github, Calendar } from "lucide-react";
+import { ExternalLink, Github } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -88,23 +87,18 @@ export default async function PortfolioPage() {
                 </CardContent>
 
                 <CardFooter className="flex gap-2">
-                  <Button asChild variant="default" size="sm" className="flex-1 group">
-                    <Link href={`/portfolio/${project.id}`}>
-                      詳細
-                      <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </Link>
-                  </Button>
+                  {project.demo_url && (
+                    <Button asChild variant="default" size="sm" className="flex-1 group">
+                      <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
+                        アプリへ
+                        <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+                    </Button>
+                  )}
                   {project.github_url && (
                     <Button asChild variant="outline" size="sm">
                       <a href={project.github_url} target="_blank" rel="noopener noreferrer">
                         <Github className="h-3 w-3" />
-                      </a>
-                    </Button>
-                  )}
-                  {project.demo_url && (
-                    <Button asChild variant="outline" size="sm">
-                      <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-3 w-3" />
                       </a>
                     </Button>
                   )}
