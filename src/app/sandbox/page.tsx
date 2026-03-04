@@ -28,7 +28,7 @@ export default async function SandboxPage() {
             <span className="text-sm font-medium">Sandbox</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
-            実験サンドボックス
+            サンドボックス
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
             新技術とアイデアを探求する実験・開発中のプロジェクト

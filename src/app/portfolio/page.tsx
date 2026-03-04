@@ -23,7 +23,7 @@ export default async function PortfolioPage() {
       <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-8 md:mb-12 text-center animate-fade-in-up opacity-0">
           <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
-            Portfolio
+            プロダクト
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
             プロダクト、アプリ、ツールなどのポートフォリオ
