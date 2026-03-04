@@ -1,39 +1,22 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SocialIcon } from "@/components/SocialIcon";
 import { getPublishedPortfolioItems } from "@/lib/api/portfolio";
 import { getPublishedBlogPosts } from "@/lib/api/blog";
 import { getPublishedSandboxItems } from "@/lib/api/sandbox";
-import { getProfile } from "@/lib/api/profile";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [portfolioItems, blogPosts, sandboxItems, profile] = await Promise.all([
+  const [portfolioItems, blogPosts, sandboxItems] = await Promise.all([
     getPublishedPortfolioItems(),
     getPublishedBlogPosts(),
     getPublishedSandboxItems(),
-    getProfile(),
   ]);
 
   const recentPortfolio = portfolioItems.slice(0, 5);
   const recentBlogPosts = blogPosts.slice(0, 4);
   const recentSandbox = sandboxItems.slice(0, 5);
-
-  const activeSocialLinks = profile
-    ? Object.entries({
-        x: { url: profile.social_x_url, icon: profile.social_x_icon_url },
-        instagram: { url: profile.social_instagram_url, icon: profile.social_instagram_icon_url },
-        tiktok: { url: profile.social_tiktok_url, icon: profile.social_tiktok_icon_url },
-        youtube: { url: profile.social_youtube_url, icon: profile.social_youtube_icon_url },
-        note: { url: profile.social_note_url, icon: profile.social_note_icon_url },
-        zenn: { url: profile.social_zenn_url, icon: profile.social_zenn_icon_url },
-        qiita: { url: profile.social_qiita_url, icon: profile.social_qiita_icon_url },
-        other: { url: profile.social_other_url, icon: profile.social_other_icon_url },
-      }).filter(([_, data]) => data.url && data.url.trim() !== "")
-    : [];
 
   return (
     <div className="relative min-h-screen">
@@ -41,36 +24,6 @@ export default async function Home() {
       <div className="fixed inset-0 -z-10 bg-gradient-mesh opacity-50" />
 
       <div className="container mx-auto px-4 py-12 md:py-20">
-        {/* Social Icons */}
-        {activeSocialLinks.length > 0 && (
-          <div className="flex items-center gap-2 mb-12 md:mb-16 animate-fade-in-up opacity-0">
-            {activeSocialLinks.map(([platform, data]) => {
-              if (!data.url) return null;
-              if (data.icon && data.icon.trim() !== "") {
-                return (
-                  <Link
-                    key={platform}
-                    href={data.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-primary/10 hover:text-primary transition-all duration-200"
-                  >
-                    <Image src={data.icon} alt={platform} width={20} height={20} className="rounded-sm" />
-                  </Link>
-                );
-              }
-              if (platform === "other") return null;
-              return (
-                <SocialIcon
-                  key={platform}
-                  platform={platform as "x" | "instagram" | "tiktok" | "youtube" | "note" | "zenn" | "qiita"}
-                  href={data.url}
-                />
-              );
-            })}
-          </div>
-        )}
-
         {/* Products Section */}
         <section className="mb-16 md:mb-24">
           <div className="flex items-center justify-between mb-6 md:mb-8">

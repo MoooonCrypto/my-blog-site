@@ -25,8 +25,11 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="w-9 h-9 hover:bg-primary/10"
+      onClick={(e) => {
+        setTheme(resolvedTheme === "dark" ? "light" : "dark");
+        e.currentTarget.blur();
+      }}
+      className="w-9 h-9 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-0"
     >
       {resolvedTheme === "dark" ? (
         <Sun className="h-5 w-5" />

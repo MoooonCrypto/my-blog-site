@@ -132,6 +132,19 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
         </div>
       </div>
 
+      {/* Mobile Social Icons - always visible, part of sticky header */}
+      {activeSocialLinks.length > 0 && (
+        <div className="md:hidden border-t border-border/50">
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex items-center gap-2">
+              {activeSocialLinks.map(([platform, data]) =>
+                renderSocialIcon(platform, data)
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border/50 glass-effect">
