@@ -154,13 +154,6 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
                 </li>
               ))}
             </ul>
-            {activeSocialLinks.length > 0 && (
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
-                {activeSocialLinks.map(([platform, data]) =>
-                  renderSocialIcon(platform, data)
-                )}
-              </div>
-            )}
           </div>
         </div>
       )}
