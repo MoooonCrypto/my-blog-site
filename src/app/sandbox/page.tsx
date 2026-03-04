@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2, Sparkles } from "lucide-react";
+import { ExternalLink, Github, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ export default async function SandboxPage() {
             <span className="text-sm font-medium">Sandbox</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
-            実験サンドボックス
+            サンドボックス
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
             新技術とアイデアを探求する実験・開発中のプロジェクト
@@ -92,13 +92,27 @@ export default async function SandboxPage() {
                   )}
                 </CardContent>
 
-                <CardFooter>
-                  <Button asChild variant="default" className="w-full group" size="sm">
-                    <Link href={`/sandbox/${project.id}`}>
-                      詳細を見る
-                      <Code2 className="ml-2 h-3 w-3 transition-transform group-hover:rotate-12" />
-                    </Link>
-                  </Button>
+                <CardFooter className="flex gap-2">
+                  {project.demo_url ? (
+                    <Button asChild variant="default" size="sm" className="flex-1 group">
+                      <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
+                        アプリへ
+                        <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button variant="default" size="sm" className="flex-1" disabled>
+                      アプリへ
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </Button>
+                  )}
+                  {project.github_url && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                        <Github className="h-3 w-3" />
+                      </a>
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}

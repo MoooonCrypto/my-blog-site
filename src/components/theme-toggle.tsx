@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -25,13 +25,16 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="w-9 h-9 hover:bg-primary/10 transition-all duration-300"
+      onClick={(e) => {
+        setTheme(resolvedTheme === "dark" ? "light" : "dark");
+        e.currentTarget.blur();
+      }}
+      className="w-9 h-9 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-0"
     >
-      {theme === "dark" ? (
-        <Sun className="h-5 w-5 rotate-0 scale-100 transition-all" />
+      {resolvedTheme === "dark" ? (
+        <Sun className="h-5 w-5" />
       ) : (
-        <Moon className="h-5 w-5 rotate-0 scale-100 transition-all" />
+        <Moon className="h-5 w-5" />
       )}
       <span className="sr-only">テーマを切り替え</span>
     </Button>

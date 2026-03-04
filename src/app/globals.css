@@ -87,12 +87,15 @@
 
   html {
     @apply bg-background text-foreground;
+    width: 100%;
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    transition: background-color 0.3s ease;
   }
 
   body {
     @apply bg-background text-foreground;
+    width: 100%;
     min-height: 100vh;
     min-height: -webkit-fill-available;
     transition: background-color 0.3s ease, color 0.3s ease;
