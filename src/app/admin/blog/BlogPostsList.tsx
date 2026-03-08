@@ -81,49 +81,50 @@ export default function BlogPostsList({ initialPosts }: BlogPostsListProps) {
               key={post.id}
               className={`card-hover border-border/50 animate-fade-in-up opacity-0 delay-${Math.min(index * 100, 500)}`}
             >
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  {post.featured_image && (
-                    <div
-                      className="w-24 h-24 rounded-lg overflow-hidden border border-border/50 flex-shrink-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${post.featured_image})` }}
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="font-heading text-lg truncate">
-                        {post.title}
-                      </CardTitle>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                          post.published
-                            ? "bg-primary/10 text-primary"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {post.published ? "公開" : "下書き"}
-                      </span>
-                    </div>
-                    {post.excerpt && (
-                      <CardDescription className="line-clamp-2">
-                        {post.excerpt}
-                      </CardDescription>
+              <CardHeader className="pb-3">
+                {/* モバイル: 縦積み / デスクトップ: 横並び */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
+                    {post.featured_image && (
+                      <div
+                        className="w-16 h-16 rounded-lg overflow-hidden border border-border/50 flex-shrink-0 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${post.featured_image})` }}
+                      />
                     )}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>スラッグ: {post.slug}</span>
-                      <span>作成日: {formatDate(post.created_at)}</span>
-                      {post.published_at && (
-                        <span>公開日: {formatDate(post.published_at)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 mb-1">
+                        <CardTitle className="font-heading text-base leading-snug flex-1">
+                          {post.title}
+                        </CardTitle>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${
+                            post.published
+                              ? "bg-primary/10 text-primary"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {post.published ? "公開" : "下書き"}
+                        </span>
+                      </div>
+                      {post.excerpt && (
+                        <CardDescription className="line-clamp-1 text-xs">
+                          {post.excerpt}
+                        </CardDescription>
                       )}
-                      {post.view_count !== null && post.view_count > 0 && (
-                        <span>閲覧数: {post.view_count}</span>
-                      )}
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+                        <span className="truncate max-w-[140px]">/{post.slug}</span>
+                        <span>作成: {formatDate(post.created_at)}</span>
+                        {post.published_at && (
+                          <span>公開: {formatDate(post.published_at)}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex gap-2 justify-end">
                     <Button asChild variant="outline" size="sm">
                       <Link href={`/admin/blog/${post.id}/edit`}>
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 mr-1" />
+                        編集
                       </Link>
                     </Button>
                     <Button
@@ -134,7 +135,7 @@ export default function BlogPostsList({ initialPosts }: BlogPostsListProps) {
                       disabled={isDeleting === post.id}
                     >
                       {isDeleting === post.id ? (
-                        <span className="h-4 w-4 animate-spin">⏳</span>
+                        <span className="animate-spin">⏳</span>
                       ) : (
                         <Trash2 className="h-4 w-4" />
                       )}

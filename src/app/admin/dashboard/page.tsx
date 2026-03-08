@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   // 【二重防御】middlewareのバックアップとして、ページレベルでも認証チェック
+  // redirect()はNext.js内部でNEXT_REDIRECTをthrowするため、try/catchの外で呼ぶ
+  let authenticated = false;
   try {
     const supabase = await createClient();
     const {
@@ -16,19 +18,21 @@ export default async function AdminDashboardPage() {
       error,
     } = await supabase.auth.getUser();
 
-    // エラーがある、またはユーザーが存在しない場合は必ずログインページへ
-    if (error || !user) {
-      redirect("/admin/login");
+    if (!error && user) {
+      authenticated = true;
     }
-  } catch (error) {
-    // 予期しない例外が発生した場合も必ず拒否
+  } catch {
+    // 認証チェック失敗時はfalseのまま
+  }
+
+  if (!authenticated) {
     redirect("/admin/login");
   }
 
   const [blogPosts, portfolioItems, sandboxItems] = await Promise.all([
-    getAllBlogPosts(),
-    getAllPortfolioItems(),
-    getAllSandboxItems(),
+    getAllBlogPosts().catch(() => []),
+    getAllPortfolioItems().catch(() => []),
+    getAllSandboxItems().catch(() => []),
   ]);
 
   const contentSummary = {
@@ -37,19 +41,18 @@ export default async function AdminDashboardPage() {
     blogPosts: blogPosts.length,
   };
 
-  // 最近のアクティビティを生成（作成日順に上位3件）
   const recentActivity = [
     ...blogPosts.slice(0, 1).map((post) => ({
       action: `ブログ記事「${post.title}」を${post.published ? "公開" : "作成"}`,
-      time: new Date(post.created_at!).toLocaleDateString("ja-JP"),
+      time: post.created_at ? new Date(post.created_at).toLocaleDateString("ja-JP") : "日付不明",
     })),
     ...portfolioItems.slice(0, 1).map((item) => ({
       action: `ポートフォリオ「${item.title}」を${item.published ? "公開" : "作成"}`,
-      time: new Date(item.created_at!).toLocaleDateString("ja-JP"),
+      time: item.created_at ? new Date(item.created_at).toLocaleDateString("ja-JP") : "日付不明",
     })),
     ...sandboxItems.slice(0, 1).map((item) => ({
       action: `Sandboxプロジェクト「${item.title}」を${item.published ? "公開" : "作成"}`,
-      time: new Date(item.created_at!).toLocaleDateString("ja-JP"),
+      time: item.created_at ? new Date(item.created_at).toLocaleDateString("ja-JP") : "日付不明",
     })),
   ].slice(0, 3);
 
