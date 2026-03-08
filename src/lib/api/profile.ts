@@ -6,21 +6,28 @@ export type ProfileUpdate = TablesUpdate<'profiles'>
 
 /**
  * プロフィールを取得（最初の1件）
+ * エラー時はnullを返す（throwしない）
  */
 export async function getProfile() {
-  const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .limit(1)
-    .single()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .limit(1)
+      .maybeSingle()
 
-  if (error) {
-    throw error
+    if (error) {
+      console.error('getProfile error:', error)
+      return null
+    }
+
+    return data
+  } catch (e) {
+    console.error('getProfile exception:', e)
+    return null
   }
-
-  return data
 }
 
 /**
