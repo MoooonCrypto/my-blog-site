@@ -1,10 +1,8 @@
-import Link from "next/link";
-import { ExternalLink, Github, Sparkles } from "lucide-react";
+import { Github, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -40,16 +38,26 @@ export default async function SandboxPage() {
             <p className="text-muted-foreground">まだ公開されているプロジェクトがありません</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {projects.map((project, index) => (
               <Card
                 key={project.id}
-                className="card-hover border-border/50 flex flex-col overflow-hidden animate-fade-in-up opacity-0"
+                className="relative card-hover border-border/50 flex flex-col overflow-hidden animate-fade-in-up opacity-0 max-w-sm w-full mx-auto"
                 style={{ animationDelay: `${Math.min(index * 100, 500)}ms` }}
               >
+                {project.demo_url && (
+                  <a
+                    href={project.demo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 z-10"
+                    aria-label={`${project.title} を開く`}
+                  />
+                )}
+
                 {/* Thumbnail */}
                 {project.featured_image && (
-                  <div className="relative h-48 overflow-hidden bg-muted">
+                  <div className="relative h-56 overflow-hidden bg-muted">
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-300 hover:scale-110"
                       style={{
@@ -60,15 +68,10 @@ export default async function SandboxPage() {
                 )}
 
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <CardTitle className="font-heading text-lg flex-1">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <CardTitle className="font-heading text-base flex-1">
                       {project.title}
                     </CardTitle>
-                    {project.status && (
-                      <Badge variant="secondary" className="flex-shrink-0 text-xs">
-                        {project.status}
-                      </Badge>
-                    )}
                   </div>
                   <CardDescription className="text-sm line-clamp-2">
                     {project.description}
@@ -92,44 +95,24 @@ export default async function SandboxPage() {
                   )}
                 </CardContent>
 
-                <CardFooter className="flex gap-2">
-                  {project.demo_url ? (
-                    <Button asChild variant="default" size="sm" className="flex-1 group">
-                      <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                        アプリへ
-                        <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button variant="default" size="sm" className="flex-1" disabled>
-                      アプリへ
-                      <ExternalLink className="ml-2 h-3 w-3" />
-                    </Button>
-                  )}
-                  {project.github_url && (
-                    <Button asChild variant="outline" size="sm">
-                      <a href={project.github_url} target="_blank" rel="noopener noreferrer">
+                {project.github_url && (
+                  <div className="px-6 pb-6">
+                    <Button asChild variant="outline" size="sm" className="relative z-20">
+                      <a
+                        href={project.github_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${project.title} のGitHub`}
+                      >
                         <Github className="h-3 w-3" />
                       </a>
                     </Button>
-                  )}
-                </CardFooter>
+                  </div>
+                )}
               </Card>
             ))}
           </div>
         )}
-
-        <div className="mt-16 p-6 md:p-8 glass-effect rounded-lg text-center animate-fade-in-up opacity-0 delay-500">
-          <h2 className="text-xl md:text-2xl font-heading font-bold mb-4">
-            新しいアイデアがありますか？
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground mb-6">
-            このサンドボックスは常に進化しています。新しい実験を定期的に追加しています。
-          </p>
-          <Button asChild variant="outline">
-            <Link href="/profile">お問い合わせ</Link>
-          </Button>
-        </div>
       </div>
     </div>
   );
