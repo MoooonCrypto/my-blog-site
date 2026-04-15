@@ -42,7 +42,7 @@ export default async function Home() {
                 まだ公開されているプロジェクトがありません
               </p>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+              <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                 {recentPortfolio.map((project, index) => (
                   <Link
                     key={project.id}
@@ -52,7 +52,7 @@ export default async function Home() {
                     className="group flex-shrink-0 snap-start animate-fade-in-up opacity-0"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden card-hover border border-border/50">
+                    <div className="relative w-44 h-40 md:w-52 md:h-44 rounded-xl overflow-hidden card-hover border border-border/50">
                       {project.featured_image ? (
                         <div
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
@@ -95,7 +95,7 @@ export default async function Home() {
                 まだ公開されているプロジェクトがありません
               </p>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+              <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                 {recentSandbox.map((item, index) => (
                   <Link
                     key={item.id}
@@ -105,7 +105,7 @@ export default async function Home() {
                     className="group flex-shrink-0 snap-start animate-fade-in-up opacity-0"
                     style={{ animationDelay: `${200 + index * 100}ms` }}
                   >
-                    <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden card-hover border border-border/50">
+                    <div className="relative w-44 h-40 md:w-52 md:h-44 rounded-xl overflow-hidden card-hover border border-border/50">
                       {item.featured_image ? (
                         <div
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
@@ -148,7 +148,7 @@ export default async function Home() {
                 まだ公開されている記事がありません
               </p>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+              <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                 {recentBlogPosts.map((post, index) => (
                   <Link
                     key={post.slug}
@@ -156,7 +156,7 @@ export default async function Home() {
                     className="group flex-shrink-0 snap-start animate-fade-in-up opacity-0"
                     style={{ animationDelay: `${400 + index * 100}ms` }}
                   >
-                    <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden card-hover border border-border/50">
+                    <div className="relative w-44 h-40 md:w-52 md:h-44 rounded-xl overflow-hidden card-hover border border-border/50">
                       {post.featured_image ? (
                         <div
                           className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
