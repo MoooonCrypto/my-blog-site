@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { NextAuthSessionProvider } from "@/components/session-provider";
 import { cn } from "@/lib/utils";
 
 const syne = Syne({
@@ -31,7 +32,7 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "MokosauBlog",
+  title: "mokosau",
   description: "プロダクトと技術記事を発信するブログ",
 };
 
@@ -62,18 +63,20 @@ export default function RootLayout({
           notoSansJP.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange={true}
-        >
-          <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </ThemeProvider>
+        <NextAuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange={true}
+          >
+            <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </ThemeProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );

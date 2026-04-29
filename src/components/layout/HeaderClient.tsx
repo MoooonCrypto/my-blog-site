@@ -9,24 +9,14 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { SocialIcon } from "@/components/SocialIcon";
 import { cn } from "@/lib/utils";
 
-type SocialLinkData = {
-  url: string | null;
+type SocialLinkItem = {
+  platform: string;
+  url: string;
   icon: string | null;
 };
 
-type SocialLinks = {
-  x: SocialLinkData;
-  instagram: SocialLinkData;
-  tiktok: SocialLinkData;
-  youtube: SocialLinkData;
-  note: SocialLinkData;
-  zenn: SocialLinkData;
-  qiita: SocialLinkData;
-  other: SocialLinkData;
-} | null;
-
 interface HeaderClientProps {
-  socialLinks: SocialLinks;
+  socialLinks: SocialLinkItem[];
 }
 
 export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
@@ -34,33 +24,24 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const links = [
-    { href: "/portfolio", label: "Portfolio" },
-    { href: "/sandbox", label: "Sandbox" },
+    { href: "/products", label: "Products" },
     { href: "/blog", label: "Blog" },
     { href: "/profile", label: "Profile" },
   ];
 
-  // Filter only social links that have a URL
-  const activeSocialLinks = socialLinks
-    ? Object.entries(socialLinks).filter(
-        ([_, data]) => data.url && data.url.trim() !== ""
-      )
-    : [];
-
-  const renderSocialIcon = (platform: string, data: SocialLinkData) => {
-    if (!data.url) return null;
-    if (data.icon && data.icon.trim() !== "") {
+  const renderSocialIcon = (item: SocialLinkItem) => {
+    if (item.icon && item.icon.trim() !== "") {
       return (
         <Link
-          key={platform}
-          href={data.url}
+          key={item.platform}
+          href={item.url}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-muted transition-colors"
         >
           <Image
-            src={data.icon}
-            alt={platform}
+            src={item.icon}
+            alt={item.platform}
             width={20}
             height={20}
             className="rounded-sm"
@@ -69,7 +50,7 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
       );
     }
     return (
-      <SocialIcon key={platform} platform={platform as any} href={data.url} />
+      <SocialIcon key={item.platform} platform={item.platform as any} href={item.url} />
     );
   };
 
@@ -81,15 +62,13 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
           href="/"
           className="font-heading font-bold text-lg md:text-2xl tracking-tight hover:text-primary transition-colors flex-shrink-0"
         >
-          MokosauBlog
+          mokosau
         </Link>
 
-        {/* Social Icons - Desktop only */}
-        {activeSocialLinks.length > 0 && (
+        {/* Social Icons - Desktop */}
+        {socialLinks.length > 0 && (
           <div className="hidden md:flex items-center gap-2">
-            {activeSocialLinks.map(([platform, data]) =>
-              renderSocialIcon(platform, data)
-            )}
+            {socialLinks.map((item) => renderSocialIcon(item))}
           </div>
         )}
 
@@ -123,24 +102,16 @@ export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
             className="p-2 rounded-md hover:bg-muted transition-colors"
             aria-label={mobileMenuOpen ? "メニューを閉じる" : "メニューを開く"}
           >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Social Icons - always visible, part of sticky header */}
-      {activeSocialLinks.length > 0 && (
+      {/* Mobile Social Icons */}
+      {socialLinks.length > 0 && (
         <div className="md:hidden border-t border-border/50">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center gap-2">
-              {activeSocialLinks.map(([platform, data]) =>
-                renderSocialIcon(platform, data)
-              )}
-            </div>
+          <div className="container mx-auto px-4 py-2 flex items-center gap-2">
+            {socialLinks.map((item) => renderSocialIcon(item))}
           </div>
         </div>
       )}

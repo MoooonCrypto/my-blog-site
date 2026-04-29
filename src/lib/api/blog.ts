@@ -1,138 +1,67 @@
-import { createClient } from '@/lib/supabase/server'
-import type { Tables, TablesInsert, TablesUpdate } from '@/types/database.types'
+import { db } from '@/lib/db'
+import { blog_posts } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
 
-export type BlogPost = Tables<'blog_posts'>
-export type BlogPostInsert = TablesInsert<'blog_posts'>
-export type BlogPostUpdate = TablesUpdate<'blog_posts'>
+export type { BlogPost, BlogPostInsert } from '@/lib/db/schema'
 
-/**
- * 公開されているブログ記事を全件取得
- */
 export async function getPublishedBlogPosts() {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('published', true)
-    .order('published_at', { ascending: false })
-
-  if (error) throw error
-  return data
+  const all = await db.query.blog_posts.findMany({
+    orderBy: desc(blog_posts.published_at),
+  })
+  return all.filter((p) => p.published)
 }
 
-/**
- * 全てのブログ記事を取得（管理画面用）
- */
 export async function getAllBlogPosts() {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (error) throw error
-  return data
+  return db.query.blog_posts.findMany({
+    orderBy: desc(blog_posts.created_at),
+  })
 }
 
-/**
- * スラッグからブログ記事を取得
- */
 export async function getBlogPostBySlug(slug: string) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (error) throw error
-  return data
+  return db.query.blog_posts.findFirst({
+    where: eq(blog_posts.slug, slug),
+  })
 }
 
-/**
- * IDからブログ記事を取得
- */
 export async function getBlogPostById(id: string) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (error) throw error
-  return data
+  return db.query.blog_posts.findFirst({
+    where: eq(blog_posts.id, id),
+  })
 }
 
-/**
- * ブログ記事を作成
- */
-export async function createBlogPost(post: BlogPostInsert) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .insert(post)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
+export async function createBlogPost(data: {
+  title: string
+  slug: string
+  content: string
+  excerpt?: string | null
+  featured_image?: string | null
+  tags?: string[]
+  published?: boolean
+  published_at?: string | null
+}) {
+  const id = randomUUID()
+  await db.insert(blog_posts).values({ id, ...data })
+  return db.query.blog_posts.findFirst({ where: eq(blog_posts.id, id) })
 }
 
-/**
- * ブログ記事を更新
- */
-export async function updateBlogPost(id: string, post: BlogPostUpdate) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .update(post)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
+export async function updateBlogPost(id: string, data: Partial<{
+  title: string
+  slug: string
+  content: string
+  excerpt: string | null
+  featured_image: string | null
+  tags: string[]
+  published: boolean
+  published_at: string | null
+  updated_at: string
+}>) {
+  await db.update(blog_posts)
+    .set({ ...data, updated_at: new Date().toISOString() })
+    .where(eq(blog_posts.id, id))
+  return db.query.blog_posts.findFirst({ where: eq(blog_posts.id, id) })
 }
 
-/**
- * ブログ記事を削除
- */
 export async function deleteBlogPost(id: string) {
-  const supabase = await createClient()
-
-  const { error } = await supabase
-    .from('blog_posts')
-    .delete()
-    .eq('id', id)
-
-  if (error) throw error
-}
-
-/**
- * ブログ記事の閲覧数をインクリメント
- */
-export async function incrementViewCount(id: string) {
-  const supabase = await createClient()
-
-  const { data: post } = await supabase
-    .from('blog_posts')
-    .select('view_count')
-    .eq('id', id)
-    .single()
-
-  if (!post) return
-
-  const { error } = await supabase
-    .from('blog_posts')
-    .update({ view_count: (post.view_count || 0) + 1 })
-    .eq('id', id)
-
-  if (error) throw error
+  await db.delete(blog_posts).where(eq(blog_posts.id, id))
 }

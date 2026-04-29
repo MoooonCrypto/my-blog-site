@@ -20,20 +20,29 @@ function getAppUrl(product: {
   return product.demo_url ?? null;
 }
 
-export default async function Home() {
+export default async function ProductsPage() {
   const products = await getPublishedProducts();
 
   return (
     <div className="relative min-h-screen">
       <div className="fixed inset-0 -z-10 bg-gradient-mesh opacity-50" />
 
-      <div className="container mx-auto px-4 py-12 md:py-20">
-        {products.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            まだ公開されているプロダクトがありません
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <header className="mb-10 text-center animate-fade-in-up opacity-0">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-3">
+            Products
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            開発したプロダクト一覧
           </p>
+        </header>
+
+        {products.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">まだ公開されているプロダクトがありません</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-x-2 gap-y-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8">
             {products.map((product, index) => {
               const appUrl = getAppUrl(product);
               const icon = (
@@ -41,7 +50,7 @@ export default async function Home() {
                   className="group flex flex-col items-center gap-2 animate-fade-in-up opacity-0 cursor-pointer"
                   style={{ animationDelay: `${index * 60}ms` }}
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-border/50 bg-muted shadow-md transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-border/50 bg-muted shadow-md transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl">
                     {product.icon_url ? (
                       <img
                         src={product.icon_url}
@@ -50,18 +59,20 @@ export default async function Home() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
-                        <span className="text-xl font-heading font-bold text-primary/60">
+                        <span className="text-2xl md:text-3xl font-heading font-bold text-primary/60">
                           {product.title.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs font-medium text-center line-clamp-2 leading-tight">
-                    {product.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center leading-tight">
-                    {PLATFORM_LABEL[product.platform] ?? product.platform}
-                  </p>
+                  <div className="text-center">
+                    <p className="text-xs sm:text-sm font-medium line-clamp-2 leading-tight">
+                      {product.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {PLATFORM_LABEL[product.platform] ?? product.platform}
+                    </p>
+                  </div>
                 </div>
               );
 

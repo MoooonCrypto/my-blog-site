@@ -117,7 +117,7 @@ export async function PUT(
       }
 
       return NextResponse.json(
-        { error: `記事の更新に失敗しました: ${error.message}` },
+        { error: '記事の更新に失敗しました。' },
         { status: 500 }
       );
     }

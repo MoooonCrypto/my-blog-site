@@ -1,67 +1,73 @@
-import { createClient } from '@/lib/supabase/server'
-import type { Tables, TablesUpdate } from '@/types/database.types'
+import { db } from '@/lib/db'
+import { profiles, social_links } from '@/lib/db/schema'
+import { eq, asc } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
 
-export type Profile = Tables<'profiles'>
-export type ProfileUpdate = TablesUpdate<'profiles'>
+export type { Profile, SocialLink, ProfileWithSocialLinks } from '@/lib/db/schema'
 
-/**
- * プロフィールを取得（最初の1件）
- * エラー時はnullを返す（throwしない）
- */
 export async function getProfile() {
   try {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .limit(1)
-      .maybeSingle()
-
-    if (error) {
-      console.error('getProfile error:', error)
-      return null
-    }
-
-    return data
-  } catch (e) {
-    console.error('getProfile exception:', e)
+    return db.query.profiles.findFirst({
+      with: { social_links: { orderBy: asc(social_links.display_order) } },
+    })
+  } catch {
     return null
   }
 }
 
-/**
- * IDからプロフィールを取得
- */
 export async function getProfileById(id: string) {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (error) throw error
-  return data
+  return db.query.profiles.findFirst({
+    where: eq(profiles.id, id),
+    with: { social_links: { orderBy: asc(social_links.display_order) } },
+  })
 }
 
-/**
- * プロフィールを更新
- */
-export async function updateProfile(id: string, profile: ProfileUpdate) {
-  const supabase = await createClient()
+export async function upsertProfile(data: {
+  name: string
+  title?: string | null
+  bio?: string | null
+  avatar_url?: string | null
+  email?: string | null
+  website_url?: string | null
+  github_url?: string | null
+  linkedin_url?: string | null
+}) {
+  const existing = await db.query.profiles.findFirst()
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(profile)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) {
-    throw error
+  if (existing) {
+    await db.update(profiles)
+      .set({ ...data, updated_at: new Date().toISOString() })
+      .where(eq(profiles.id, existing.id))
+    return existing.id
+  } else {
+    const id = randomUUID()
+    await db.insert(profiles).values({ id, ...data })
+    return id
   }
+}
 
-  return data
+export async function upsertSocialLinks(
+  profileId: string,
+  links: Array<{
+    platform: string
+    url: string
+    icon_url?: string | null
+    display_order?: number
+  }>
+) {
+  // 既存のリンクを削除して全件再登録
+  await db.delete(social_links).where(eq(social_links.profile_id, profileId))
+
+  if (links.length === 0) return
+
+  await db.insert(social_links).values(
+    links.map((link, i) => ({
+      id: randomUUID(),
+      profile_id: profileId,
+      platform: link.platform,
+      url: link.url,
+      icon_url: link.icon_url ?? null,
+      display_order: link.display_order ?? i,
+    }))
+  )
 }

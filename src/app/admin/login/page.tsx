@@ -2,19 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Mail, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -29,25 +23,22 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const result = await signIn("credentials", {
         email,
         password,
+        redirect: false,
       });
 
-      if (signInError) {
+      if (result?.error) {
         setError("メールアドレスまたはパスワードが正しくありません");
-        setIsLoading(false);
         return;
       }
 
-      // ログイン成功、ダッシュボードへリダイレクト
       router.push("/admin/dashboard");
       router.refresh();
-    } catch (error) {
+    } catch {
       setError("ログイン中にエラーが発生しました");
-      console.error("Login error:", error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -63,12 +54,8 @@ export default function AdminLoginPage() {
               <Lock className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-heading font-bold">
-            管理者ログイン
-          </CardTitle>
-          <CardDescription>
-            MokosauBlog管理画面へのアクセスには認証が必要です
-          </CardDescription>
+          <CardTitle className="text-2xl font-heading font-bold">管理者ログイン</CardTitle>
+          <CardDescription>管理画面へのアクセスには認証が必要です</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -113,20 +100,10 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "ログイン中..." : "ログイン"}
             </Button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-border/50">
-            <p className="text-xs text-center text-muted-foreground">
-              💡 Supabase Authで認証されます
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

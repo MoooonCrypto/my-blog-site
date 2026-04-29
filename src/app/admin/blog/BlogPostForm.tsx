@@ -107,11 +107,8 @@ export default function BlogPostForm({ initialData }: BlogPostFormProps) {
       }
 
       setSuccess(true);
-
-      // 成功後、一覧ページに遷移
       setTimeout(() => {
-        router.push("/admin/blog");
-        router.refresh();
+        window.location.href = "/admin/blog";
       }, 1000);
     } catch (error) {
       console.error("Error saving blog post:", error);

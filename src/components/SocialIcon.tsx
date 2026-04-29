@@ -1,7 +1,7 @@
 import React from "react";
 
 interface SocialIconProps {
-  platform: "x" | "instagram" | "tiktok" | "youtube" | "note" | "zenn" | "qiita";
+  platform: "x" | "instagram" | "tiktok" | "youtube" | "note" | "zenn" | "qiita" | "other" | string;
   href: string;
   className?: string;
 }
@@ -46,7 +46,11 @@ export const SocialIcon: React.FC<SocialIconProps> = ({ platform, href, classNam
           <span className="text-sm font-bold">q</span>
         );
       default:
-        return null;
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          </svg>
+        );
     }
   };
 

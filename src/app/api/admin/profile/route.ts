@@ -1,84 +1,55 @@
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { getProfile, updateProfile } from "@/lib/api/profile";
-import { checkAdminAuth } from "@/lib/auth-check";
+import { NextRequest, NextResponse } from 'next/server'
+import { getProfile, upsertProfile, upsertSocialLinks } from '@/lib/api/profile'
+import { checkAdminAuth } from '@/lib/auth-check'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  try {
-    // 認証チェック
-    const authResult = await checkAdminAuth();
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
-
-    const profile = await getProfile();
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(profile);
-  } catch (error: any) {
-    console.error("Error fetching profile:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch profile" },
-      { status: 500 }
-    );
+  const auth = await checkAdminAuth()
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
+  const profile = await getProfile()
+  return NextResponse.json(profile ?? null)
 }
 
 export async function PUT(request: NextRequest) {
+  const auth = await checkAdminAuth()
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
+  let data: any
   try {
-    // 認証チェック（既存のパターンに合わせる）
-    const authResult = await checkAdminAuth();
-    if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
+    data = await request.json()
+  } catch {
+    return NextResponse.json({ error: '不正なリクエスト形式です。' }, { status: 400 })
+  }
 
-    const body = await request.json();
+  if (!data.name?.trim()) {
+    return NextResponse.json({ error: '名前は必須です。' }, { status: 400 })
+  }
 
-    // バリデーション: 氏名は必須
-    if (!body.name || body.name.trim() === "") {
-      return NextResponse.json(
-        { error: "氏名は必須です" },
-        { status: 400 }
-      );
-    }
+  try {
+    const profileId = await upsertProfile({
+      name: data.name,
+      title: data.title ?? null,
+      bio: data.bio ?? null,
+      avatar_url: data.avatar_url ?? null,
+      email: data.email ?? null,
+      website_url: data.website_url ?? null,
+      github_url: data.github_url ?? null,
+      linkedin_url: data.linkedin_url ?? null,
+    })
 
-    // Get current profile to find the ID
-    const currentProfile = await getProfile();
+    const socialLinks = Array.isArray(data.social_links) ? data.social_links : []
+    await upsertSocialLinks(profileId, socialLinks)
 
-    if (!currentProfile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
-    }
-
-    // Update profile
-    const updatedProfile = await updateProfile(currentProfile.id, body);
-
-    // プロフィールページのキャッシュを無効化
-    revalidatePath("/profile");
-    revalidatePath("/admin/profile");
-
-    return NextResponse.json(updatedProfile);
-  } catch (error: any) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to update profile" },
-      { status: 500 }
-    );
+    const updated = await getProfile()
+    return NextResponse.json(updated)
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : ''
+    console.error('Error saving profile:', error)
+    return NextResponse.json({ error: '保存に失敗しました。' }, { status: 500 })
   }
 }
