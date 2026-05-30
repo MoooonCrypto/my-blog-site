@@ -8,21 +8,29 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 })
 
-async function migrate() {
+async function addColumn(sql: string, name: string) {
   try {
-    await client.execute(
-      `ALTER TABLE social_links ADD COLUMN show_in_header INTEGER NOT NULL DEFAULT 0`
-    )
-    console.log('Migration complete: added show_in_header column to social_links')
+    await client.execute(sql)
+    console.log(`Migration complete: added ${name} column to social_links`)
   } catch (e: any) {
     if (e.message?.includes('duplicate column')) {
-      console.log('Column show_in_header already exists, skipping')
+      console.log(`Column ${name} already exists, skipping`)
     } else {
       throw e
     }
-  } finally {
-    client.close()
   }
+}
+
+async function migrate() {
+  await addColumn(
+    `ALTER TABLE social_links ADD COLUMN show_in_header INTEGER NOT NULL DEFAULT 0`,
+    'show_in_header'
+  )
+  await addColumn(
+    `ALTER TABLE social_links ADD COLUMN title TEXT`,
+    'title'
+  )
+  client.close()
 }
 
 migrate().catch((e) => { console.error(e); process.exit(1) })

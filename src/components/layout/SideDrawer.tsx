@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 type SocialLinkItem = {
   platform: string;
+  title: string | null;
   url: string;
   icon: string | null;
 };
@@ -128,7 +129,7 @@ export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDr
                           <SocialIconGlyph platform={item.platform} />
                         )}
                       </span>
-                      <span className="capitalize">{item.platform}</span>
+                      <span className="capitalize">{item.title || item.platform}</span>
                     </a>
                   </li>
                 ))}

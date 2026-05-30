@@ -16,6 +16,7 @@ const MAX_HEADER_ICONS = 5;
 
 interface SocialLinkForm {
   platform: string;
+  title: string;
   url: string;
   icon_url: string;
   show_in_header: boolean;
@@ -49,6 +50,7 @@ export default function AdminProfilePage() {
           setSocialLinks(
             (data.social_links ?? []).map((l: any) => ({
               platform: l.platform,
+              title: l.title ?? "",
               url: l.url,
               icon_url: l.icon_url ?? "",
               show_in_header: l.show_in_header ?? false,
@@ -65,7 +67,7 @@ export default function AdminProfilePage() {
   };
 
   const addSocialLink = () => {
-    setSocialLinks((prev) => [...prev, { platform: "other", url: "", icon_url: "", show_in_header: false }]);
+    setSocialLinks((prev) => [...prev, { platform: "other", title: "", url: "", icon_url: "", show_in_header: false }]);
   };
 
   const removeSocialLink = (index: number) => {
@@ -212,6 +214,17 @@ export default function AdminProfilePage() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">
+                      表示名
+                      <span className="ml-1 text-muted-foreground font-normal">（Mediaメニューに表示。空欄ならプラットフォーム名を使用）</span>
+                    </Label>
+                    <Input
+                      value={link.title}
+                      onChange={(e) => updateSocialLink(index, "title", e.target.value)}
+                      placeholder="例: X (Twitter)、個人ブログ など"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm">URL</Label>

@@ -4,8 +4,9 @@ import { getProfile } from "@/lib/api/profile";
 export const Header = async () => {
   const profile = await getProfile();
 
-  const toItem = (link: { platform: string; url: string; icon_url: string | null }) => ({
+  const toItem = (link: { platform: string; title: string | null; url: string; icon_url: string | null }) => ({
     platform: link.platform,
+    title: link.title ?? null,
     url: link.url,
     icon: link.icon_url ?? null,
   });
