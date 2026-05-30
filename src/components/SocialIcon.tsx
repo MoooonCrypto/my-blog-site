@@ -9,7 +9,7 @@ interface SocialIconProps {
 }
 
 export const SocialIconGlyph: React.FC<{ platform: Platform }> = ({ platform }) => {
-  switch (platform) {
+  switch (platform.toLowerCase().trim()) {
     case "x":
       return (
         <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">

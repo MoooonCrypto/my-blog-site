@@ -64,10 +64,8 @@ export const social_links = sqliteTable('social_links', {
   id: text('id').primaryKey(),
   profile_id: text('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   platform: text('platform').notNull(),
-  title: text('title'),
   url: text('url').notNull(),
   icon_url: text('icon_url'),
-  show_in_header: integer('show_in_header', { mode: 'boolean' }).notNull().default(false),
   display_order: integer('display_order').notNull().default(0),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
 })

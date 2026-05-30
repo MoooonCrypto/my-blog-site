@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 
 type SocialLinkItem = {
   platform: string;
-  title: string | null;
   url: string;
   icon: string | null;
 };

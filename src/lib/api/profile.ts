@@ -50,10 +50,8 @@ export async function upsertSocialLinks(
   profileId: string,
   links: Array<{
     platform: string
-    title?: string | null
     url: string
     icon_url?: string | null
-    show_in_header?: boolean
     display_order?: number
   }>
 ) {
@@ -66,10 +64,8 @@ export async function upsertSocialLinks(
       id: randomUUID(),
       profile_id: profileId,
       platform: link.platform,
-      title: link.title ?? null,
       url: link.url,
       icon_url: link.icon_url ?? null,
-      show_in_header: link.show_in_header ?? false,
       display_order: link.display_order ?? i,
     }))
   )
