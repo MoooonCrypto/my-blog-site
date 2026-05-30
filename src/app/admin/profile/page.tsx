@@ -12,11 +12,13 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { ArrowLeft, User, Save, Plus, Trash2 } from "lucide-react";
 
 const PLATFORM_OPTIONS = ["x", "instagram", "tiktok", "youtube", "note", "zenn", "qiita", "other"];
+const MAX_HEADER_ICONS = 5;
 
 interface SocialLinkForm {
   platform: string;
   url: string;
   icon_url: string;
+  show_in_header: boolean;
 }
 
 export default function AdminProfilePage() {
@@ -49,6 +51,7 @@ export default function AdminProfilePage() {
               platform: l.platform,
               url: l.url,
               icon_url: l.icon_url ?? "",
+              show_in_header: l.show_in_header ?? false,
             }))
           );
         }
@@ -62,14 +65,14 @@ export default function AdminProfilePage() {
   };
 
   const addSocialLink = () => {
-    setSocialLinks((prev) => [...prev, { platform: "other", url: "", icon_url: "" }]);
+    setSocialLinks((prev) => [...prev, { platform: "other", url: "", icon_url: "", show_in_header: false }]);
   };
 
   const removeSocialLink = (index: number) => {
     setSocialLinks((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateSocialLink = (index: number, field: keyof SocialLinkForm, value: string) => {
+  const updateSocialLink = (index: number, field: keyof SocialLinkForm, value: string | boolean) => {
     setSocialLinks((prev) =>
       prev.map((link, i) => (i === index ? { ...link, [field]: value } : link))
     );
@@ -103,6 +106,8 @@ export default function AdminProfilePage() {
       setIsSaving(false);
     }
   };
+
+  const headerCount = socialLinks.filter((l) => l.show_in_header && l.url.trim() !== "").length;
 
   if (isLoading) {
     return <div className="container mx-auto px-4 py-8"><p className="text-center">読み込み中...</p></div>;
@@ -166,8 +171,15 @@ export default function AdminProfilePage() {
           {/* SNS Links */}
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-heading">SNSリンク</CardTitle>
-              <CardDescription>ヘッダーに表示されるSNSアイコンのリンクを設定します</CardDescription>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-heading">SNSリンク</CardTitle>
+                <span className={`text-sm font-medium tabular-nums ${headerCount >= MAX_HEADER_ICONS ? "text-primary" : "text-muted-foreground"}`}>
+                  {headerCount} / {MAX_HEADER_ICONS} をヘッダーに表示
+                </span>
+              </div>
+              <CardDescription>
+                ヘッダーに表示するSNSアイコンを最大{MAX_HEADER_ICONS}個選択できます。サイドメニューのMediaには全リンクが表示されます。
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {socialLinks.map((link, index) => (
@@ -182,9 +194,24 @@ export default function AdminProfilePage() {
                         <option key={p} value={p}>{p}</option>
                       ))}
                     </select>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeSocialLink(index)} className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      {/* show_in_header toggle */}
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={link.show_in_header}
+                          disabled={!link.show_in_header && headerCount >= MAX_HEADER_ICONS}
+                          onChange={(e) => updateSocialLink(index, "show_in_header", e.target.checked)}
+                          className="h-4 w-4 rounded border-input accent-primary disabled:cursor-not-allowed"
+                        />
+                        <span className={`text-xs font-medium ${!link.show_in_header && headerCount >= MAX_HEADER_ICONS ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
+                          ヘッダーに表示
+                        </span>
+                      </label>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removeSocialLink(index)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm">URL</Label>
@@ -201,7 +228,7 @@ export default function AdminProfilePage() {
               <Button type="button" variant="outline" onClick={addSocialLink} className="w-full gap-2">
                 <Plus className="h-4 w-4" />SNSリンクを追加
               </Button>
-              <p className="text-xs text-muted-foreground">URLが空欄のSNSはヘッダーに表示されません</p>
+              <p className="text-xs text-muted-foreground">URLが空欄のSNSは保存されません</p>
             </CardContent>
           </Card>
 

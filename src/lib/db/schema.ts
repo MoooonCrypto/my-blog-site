@@ -66,6 +66,7 @@ export const social_links = sqliteTable('social_links', {
   platform: text('platform').notNull(),
   url: text('url').notNull(),
   icon_url: text('icon_url'),
+  show_in_header: integer('show_in_header', { mode: 'boolean' }).notNull().default(false),
   display_order: integer('display_order').notNull().default(0),
   created_at: text('created_at').notNull().default(sql`(datetime('now'))`),
 })

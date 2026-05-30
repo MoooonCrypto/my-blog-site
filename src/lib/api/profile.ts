@@ -52,10 +52,10 @@ export async function upsertSocialLinks(
     platform: string
     url: string
     icon_url?: string | null
+    show_in_header?: boolean
     display_order?: number
   }>
 ) {
-  // 既存のリンクを削除して全件再登録
   await db.delete(social_links).where(eq(social_links.profile_id, profileId))
 
   if (links.length === 0) return
@@ -67,6 +67,7 @@ export async function upsertSocialLinks(
       platform: link.platform,
       url: link.url,
       icon_url: link.icon_url ?? null,
+      show_in_header: link.show_in_header ?? false,
       display_order: link.display_order ?? i,
     }))
   )
