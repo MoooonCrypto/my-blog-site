@@ -103,9 +103,6 @@ export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDr
           {/* Media */}
           {allSocialLinks.length > 0 && (
             <section className="px-5">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-                Media
-              </p>
               <ul className="space-y-0.5">
                 {allSocialLinks.map((item) => (
                   <li key={`${item.platform}-${item.url}`}>
@@ -115,14 +112,14 @@ export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDr
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
                     >
-                      <span className="flex-shrink-0 flex items-center justify-center w-5 h-5">
+                      <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-muted">
                         {item.icon && item.icon.trim() !== "" ? (
                           <Image
                             src={item.icon}
                             alt={item.platform}
-                            width={18}
-                            height={18}
-                            className="rounded-sm"
+                            width={28}
+                            height={28}
+                            className="rounded-full object-cover w-8 h-8"
                           />
                         ) : (
                           <SocialIconGlyph platform={item.platform} />
