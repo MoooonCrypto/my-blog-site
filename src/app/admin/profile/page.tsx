@@ -255,6 +255,7 @@ export default function AdminProfilePage() {
                     value={link.icon_url}
                     onChange={(url) => updateSocialLink(index, "icon_url", url)}
                     folder="sns-icons"
+                    previewRound
                   />
                 </div>
               ))}
