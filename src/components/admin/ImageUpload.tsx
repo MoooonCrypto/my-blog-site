@@ -11,6 +11,7 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   folder?: string;
+  previewRound?: boolean;
 }
 
 export default function ImageUpload({
@@ -18,6 +19,7 @@ export default function ImageUpload({
   onChange,
   label = "画像",
   folder = "uploads",
+  previewRound = false,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,18 +78,24 @@ export default function ImageUpload({
       <Label>{label}</Label>
 
       {value ? (
-        <div className="relative group">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
-            <img src={value} alt="アップロード済み画像" className="h-full w-full object-cover" />
-          </div>
+        <div className="relative group w-fit">
+          {previewRound ? (
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border bg-muted flex-shrink-0">
+              <img src={value} alt="アップロード済み画像" className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
+              <img src={value} alt="アップロード済み画像" className="h-full w-full object-cover" />
+            </div>
+          )}
           <Button
             type="button"
             variant="destructive"
             size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-1.5 -right-1.5 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full"
             onClick={() => { onChange(""); setError(null); }}
           >
-            <X className="h-4 w-4 mr-1" />削除
+            <X className="h-3 w-3" />
           </Button>
         </div>
       ) : (

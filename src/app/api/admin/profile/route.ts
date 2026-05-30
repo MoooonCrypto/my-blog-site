@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getProfile, upsertProfile, upsertSocialLinks } from '@/lib/api/profile'
 import { checkAdminAuth } from '@/lib/auth-check'
 
@@ -46,6 +47,7 @@ export async function PUT(request: NextRequest) {
     await upsertSocialLinks(profileId, socialLinks)
 
     const updated = await getProfile()
+    revalidatePath('/', 'layout')
     return NextResponse.json(updated)
   } catch (error) {
     const msg = error instanceof Error ? error.message : ''
