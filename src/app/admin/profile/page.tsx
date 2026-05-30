@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { ArrowLeft, User, Save, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, User, Save, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
-const PLATFORM_OPTIONS = ["x", "instagram", "tiktok", "youtube", "note", "zenn", "qiita", "other"];
+const PLATFORM_SUGGESTIONS = ["x", "instagram", "tiktok", "youtube", "note", "zenn", "qiita"];
+const MAX_HEADER_ICONS = 5;
 
 interface SocialLinkForm {
   platform: string;
@@ -62,7 +63,7 @@ export default function AdminProfilePage() {
   };
 
   const addSocialLink = () => {
-    setSocialLinks((prev) => [...prev, { platform: "other", url: "", icon_url: "" }]);
+    setSocialLinks((prev) => [...prev, { platform: "", url: "", icon_url: "" }]);
   };
 
   const removeSocialLink = (index: number) => {
@@ -73,6 +74,16 @@ export default function AdminProfilePage() {
     setSocialLinks((prev) =>
       prev.map((link, i) => (i === index ? { ...link, [field]: value } : link))
     );
+  };
+
+  const moveSocialLink = (index: number, direction: "up" | "down") => {
+    setSocialLinks((prev) => {
+      const arr = [...prev];
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= arr.length) return prev;
+      [arr[index], arr[target]] = [arr[target], arr[index]];
+      return arr;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -167,29 +178,78 @@ export default function AdminProfilePage() {
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="font-heading">SNSリンク</CardTitle>
-              <CardDescription>ヘッダーに表示されるSNSアイコンのリンクを設定します</CardDescription>
+              <CardDescription>
+                上から{MAX_HEADER_ICONS}件がグローバルメニューに表示されます。順番を変えて表示するものを選んでください。
+                サイドメニューのMediaには全リンクが表示されます。
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {socialLinks.map((link, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <select
-                      value={link.platform}
-                      onChange={(e) => updateSocialLink(index, "platform", e.target.value)}
-                      className="rounded-md border border-input bg-background px-3 py-2 text-sm capitalize"
+                  {/* Header row: name input + header badge + move buttons + delete */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <input
+                        list={`platform-list-${index}`}
+                        value={link.platform}
+                        onChange={(e) => updateSocialLink(index, "platform", e.target.value)}
+                        placeholder="x, instagram, note, My Blog ..."
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      />
+                      <datalist id={`platform-list-${index}`}>
+                        {PLATFORM_SUGGESTIONS.map((p) => (
+                          <option key={p} value={p} />
+                        ))}
+                      </datalist>
+                    </div>
+
+                    {index < MAX_HEADER_ICONS && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                        ヘッダー
+                      </span>
+                    )}
+
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => moveSocialLink(index, "up")}
+                        disabled={index === 0}
+                        className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        aria-label="上に移動"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveSocialLink(index, "down")}
+                        disabled={index === socialLinks.length - 1}
+                        className="p-1 rounded hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        aria-label="下に移動"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeSocialLink(index)}
+                      className="text-destructive hover:text-destructive flex-shrink-0"
                     >
-                      {PLATFORM_OPTIONS.map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeSocialLink(index)} className="text-destructive hover:text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
+
                   <div className="space-y-2">
                     <Label className="text-sm">URL</Label>
-                    <Input value={link.url} onChange={(e) => updateSocialLink(index, "url", e.target.value)} placeholder="https://..." />
+                    <Input
+                      value={link.url}
+                      onChange={(e) => updateSocialLink(index, "url", e.target.value)}
+                      placeholder="https://..."
+                    />
                   </div>
+
                   <ImageUpload
                     label="アイコン画像（オプション）"
                     value={link.icon_url}
@@ -198,10 +258,11 @@ export default function AdminProfilePage() {
                   />
                 </div>
               ))}
+
               <Button type="button" variant="outline" onClick={addSocialLink} className="w-full gap-2">
                 <Plus className="h-4 w-4" />SNSリンクを追加
               </Button>
-              <p className="text-xs text-muted-foreground">URLが空欄のSNSはヘッダーに表示されません</p>
+              <p className="text-xs text-muted-foreground">URLが空欄のリンクは保存されません</p>
             </CardContent>
           </Card>
 

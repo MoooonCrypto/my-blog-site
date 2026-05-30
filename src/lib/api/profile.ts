@@ -55,7 +55,6 @@ export async function upsertSocialLinks(
     display_order?: number
   }>
 ) {
-  // 既存のリンクを削除して全件再登録
   await db.delete(social_links).where(eq(social_links.profile_id, profileId))
 
   if (links.length === 0) return
