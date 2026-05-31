@@ -18,10 +18,9 @@ type SocialLinkItem = {
 
 interface HeaderClientProps {
   headerSocialLinks: SocialLinkItem[];
-  allSocialLinks: SocialLinkItem[];
 }
 
-export const HeaderClient = ({ headerSocialLinks, allSocialLinks }: HeaderClientProps) => {
+export const HeaderClient = ({ headerSocialLinks }: HeaderClientProps) => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -39,9 +38,9 @@ export const HeaderClient = ({ headerSocialLinks, allSocialLinks }: HeaderClient
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-muted transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden hover:opacity-80 transition-opacity flex-shrink-0"
         >
-          <Image src={item.icon} alt={item.platform} width={20} height={20} className="rounded-sm" />
+          <Image src={item.icon} alt={item.platform} width={32} height={32} className="w-full h-full object-cover" />
         </Link>
       );
     }
@@ -113,7 +112,6 @@ export const HeaderClient = ({ headerSocialLinks, allSocialLinks }: HeaderClient
       <SideDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        allSocialLinks={allSocialLinks}
         pathname={pathname}
       />
     </>

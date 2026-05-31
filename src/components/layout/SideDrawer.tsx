@@ -2,21 +2,12 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { X } from "lucide-react";
-import { SocialIconGlyph } from "@/components/SocialIcon";
 import { cn } from "@/lib/utils";
-
-type SocialLinkItem = {
-  platform: string;
-  url: string;
-  icon: string | null;
-};
 
 interface SideDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  allSocialLinks: SocialLinkItem[];
   pathname: string;
 }
 
@@ -26,7 +17,7 @@ const navLinks = [
   { href: "/profile", label: "Profile" },
 ];
 
-export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDrawerProps) => {
+export const SideDrawer = ({ isOpen, onClose, pathname }: SideDrawerProps) => {
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -73,13 +64,9 @@ export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDr
           </button>
         </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto py-5 space-y-6">
-          {/* Navigation */}
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto py-5">
           <section className="px-5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-              Navigation
-            </p>
             <ul className="space-y-0.5">
               {navLinks.map((link) => (
                 <li key={link.href}>
@@ -99,39 +86,6 @@ export const SideDrawer = ({ isOpen, onClose, allSocialLinks, pathname }: SideDr
               ))}
             </ul>
           </section>
-
-          {/* Media */}
-          {allSocialLinks.length > 0 && (
-            <section className="px-5">
-              <ul className="space-y-0.5">
-                {allSocialLinks.map((item) => (
-                  <li key={`${item.platform}-${item.url}`}>
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
-                    >
-                      <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-muted">
-                        {item.icon && item.icon.trim() !== "" ? (
-                          <Image
-                            src={item.icon}
-                            alt={item.platform}
-                            width={28}
-                            height={28}
-                            className="rounded-full object-cover w-8 h-8"
-                          />
-                        ) : (
-                          <SocialIconGlyph platform={item.platform} />
-                        )}
-                      </span>
-                      <span>{item.platform}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
       </div>
     </>
