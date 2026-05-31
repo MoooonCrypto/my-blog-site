@@ -15,7 +15,6 @@ export const Header = async () => {
   const validLinks = (profile?.social_links ?? []).filter((l) => l.url.trim() !== "");
 
   const headerSocialLinks = validLinks.slice(0, MAX_HEADER_ICONS).map(toItem);
-  const allSocialLinks = validLinks.map(toItem);
 
-  return <HeaderClient headerSocialLinks={headerSocialLinks} allSocialLinks={allSocialLinks} />;
+  return <HeaderClient headerSocialLinks={headerSocialLinks} />;
 };
