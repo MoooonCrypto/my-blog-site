@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main, ui-shell-review]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    env:
+      TURSO_DATABASE_URL: libsql://example.turso.io
+      TURSO_AUTH_TOKEN: dummy-token
+      AUTH_SECRET: dummy-ci-secret
+      NEXTAUTH_URL: http://localhost:3000
+      ADMIN_EMAIL: ci@example.com
+      ADMIN_PASSWORD_HASH: dummy-password-hash
+      CLOUDFLARE_R2_ACCOUNT_ID: dummy-account
+      CLOUDFLARE_R2_ACCESS_KEY_ID: dummy-access-key
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: dummy-secret-key
+      CLOUDFLARE_R2_BUCKET_NAME: dummy-bucket
+      NEXT_PUBLIC_R2_PUBLIC_URL: https://example.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build

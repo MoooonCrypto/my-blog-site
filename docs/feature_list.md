@@ -1,25 +1,38 @@
+# Feature List
 
-# 機能一覧表
+このドキュメントは現在の実装に合わせた機能一覧です。実際に動いている画面と責務だけを記載します。
 
-## MVP（Minimum Viable Product）の基本機能
+## Public Pages
 
-| 機能 | 説明 | 優先度 |
-|---|---|---|
-| **トップページ** | サイトの玄関口。各ページへのナビゲーションと、最新のブログ記事やプロジェクトへのリンクを配置する。 | **Must have** |
-| **ポートフォリオページ** | 開発済みのアプリやWebサービスを一覧表示する。各プロジェクトには、サムネイル画像、タイトル、概要、使用技術、関連リンク（GitHub, サイトURLなど）を含める。 | **Must have** |
-| **Sandboxページ** | 開発中や実験的な取り組みを一覧表示する。ポートフォリオと同様の形式で、進捗やアイデアを共有する場とする。 | **Must have** |
-| **プロフィールページ** | 自己紹介、経歴、スキルセット、連絡先情報（SNSリンクなど）を掲載する。 | **Must have** |
-| **ブログ一覧ページ** | 簡易なブログ記事を一覧表示する。タイトル、投稿日、概要、サムネイル画像を表示する。 | **Must have** |
-| **ブログ記事詳細ページ** | Markdownで記述されたブログ記事の本文を表示する。 | **Must have** |
-| **管理画面（Admin）** | ポートフォリオ、Sandbox、ブログ記事のCRUD（作成、読み取り、更新、削除）操作を行えるようにする。 | **Must have** |
-| **認証（Admin）** | 管理画面へのアクセスを制限するためのログイン機能。 | **Must have** |
+| Page | Status | Notes |
+|---|---:|---|
+| Home | implemented | 公開中プロダクトをアイコン一覧で表示 |
+| Products | implemented | 公開中プロダクトの一覧表示 |
+| Product detail | implemented | 説明、スクリーンショット、技術、デモ/GitHubリンクを表示 |
+| Blog | implemented | 公開中記事の一覧表示 |
+| Blog detail | implemented | 記事本文、タグ、公開日を表示 |
+| Profile | implemented | プロフィール、連絡先、SNSリンクを表示 |
 
-## 将来的な拡張機能 (Nice to have)
+## Admin Pages
 
-| 機能 | 説明 |
-|---|---|
-| **ブログのカテゴリ・タグ機能** | 記事を分類し、ユーザーが興味のあるトピックを見つけやすくする。 |
-| **全文検索機能** | サイト内のコンテンツをキーワードで検索できるようにする。 |
-| **OGP・ファビコン設定** | SNSでシェアされた際のリッチな表示や、ブラウザタブのアイコンを設定する。 |
-| **お問い合わせフォーム** | サイト訪問者が直接連絡を取れるようにする。 |
-| **レスポンシブデザインの高度化** | より多様なデバイスでの閲覧体験を最適化する。 |
+| Page | Status | Notes |
+|---|---:|---|
+| Admin login | implemented | NextAuth Credentialsでログイン |
+| Dashboard | implemented | コンテンツ数と主要管理画面へのリンク |
+| Products admin | implemented | プロダクトの作成、編集、削除、スクリーンショット管理 |
+| Blog admin | implemented | ブログ記事の作成、編集、削除 |
+| Profile admin | implemented | プロフィールとSNSリンクの編集 |
+| Image upload | implemented | Cloudflare R2へアップロード |
+
+## Not In Scope
+
+- Sandboxページ
+- MDXベースのブログ
+- 一般ユーザー向けアカウント機能
+
+## Near-Term Improvements
+
+- READMEへの本番URLとスクリーンショット追加
+- Products詳細の掲載文面を採用向けに調整
+- `next/image` への置き換え
+- 依存パッケージ更新の検証

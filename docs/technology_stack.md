@@ -1,22 +1,20 @@
+# Technology Stack
 
-# 技術スタック
+現在の実装で使っている主要技術の整理です。
 
-## 確定の技術スタック
-
-| カテゴリ | 技術 | 選定理由 |
+| Area | Technology | Purpose |
 |---|---|---|
-| **フロントエンド** | Next.js 14+ (App Router) | - **制約条件**: ユーザーからの指定。<br>- **メリット**: App Routerによる最新のReact機能の活用、Server Componentsによるパフォーマンス向上、Vercelとの親和性の高さ。 |
-| **バックエンド** | Next.js (Route Handlers) | - **制約条件**: ユーザーからの指定。<br>- **メリット**: フロントエンドと同一フレームワークで開発できるため、コンテキストスイッチが少なく効率的。小規模なAPIであれば、別途サーバーを立てる必要がない。 |
-| **言語** | TypeScript (strict mode) | - **制約条件**: ユーザーからの指定。<br>- **メリット**: 型安全性によるバグの早期発見、コードの可読性向上、エディタの強力なサポート。 |
-| **デプロイ** | Vercel | - **制約条件**: ユーザーからの指定。<br>- **メリット**: Next.jsとの親和性が非常に高く、デプロイが容易。CI/CDが自動で設定され、プレビュー機能も充実している。 |
-| **スタイリング** | Tailwind CSS | - **制約条件**: ユーザーからの指定。<br>- **メリット**: ユーティリティファーストなCSSフレームワークであり、デザインの迅速な実装が可能。コンポーネントのスコープでスタイルを管理しやすく、CSSの肥大化を防げる。 |
+| Framework | Next.js 14 App Router | 公開ページ、管理画面、Route Handlersを同一リポジトリで扱う |
+| UI | React 18 | App Router上のUI実装 |
+| Language | TypeScript | DB/API/UI間の型崩れを減らす |
+| Styling | Tailwind CSS | 小規模なポートフォリオUIを素早く調整する |
+| Database | Turso / LibSQL | プロダクト、ブログ、プロフィールを保存する |
+| ORM | Drizzle ORM | SQLite系スキーマをTypeScriptから扱う |
+| Auth | NextAuth Credentials | `/admin` 配下の管理画面を保護する |
+| Storage | Cloudflare R2 | アイコン、スクリーンショット、プロフィール画像を保存する |
+| CI | GitHub Actions | install、typecheck、buildを検証する |
 
-## 選定した技術スタック
+## Notes
 
-| カテゴリ | 技術 | 選定理由 |
-|---|---|---|
-| **データベース** | Supabase (PostgreSQL) | - **提案**: ユーザーからの提案に合意。<br>- **メリット**: 無料枠が充実しており、個人開発に最適。PostgreSQLをベースにしており、信頼性が高い。認証、ストレージなどのBaaS機能も提供しており、開発を高速化できる。 |
-| **認証** | Supabase Auth | - **提案**: Supabaseとの親和性を考慮。<br>- **メリット**: SupabaseのDBと統合されており、ユーザー管理が容易。Email/Password認証、ソーシャルログインなど、多様な認証方法をサポート。RLS（Row Level Security）との連携で、セキュアなデータアクセス制御が可能。 |
-| **UIコンポーネント** | Shadcn/ui | - **提案**: Tailwind CSSとの親和性を考慮。<br>- **メリット**: アクセシビリティに配慮した高品質なUIコンポーネントを提供。必要なコンポーネントを個別に追加でき、プロジェクトの肥大化を防げる。デザインのカスタマイズが容易。 |
-| **フォーム管理** | React Hook Form + Zod | - **提案**: 型安全なフォーム実装のため。<br>- **メリット**: パフォーマンスが良く、再レンダリングを最小限に抑える。Zodと組み合わせることで、フォームのバリデーションを型安全に実装できる。 |
-| **Markdown処理** | `next-mdx-remote` | - **提案**: ブログ機能の実装のため。<br>- **メリット**: MDX（Markdown + JSX）をサポートしており、Markdown内でReactコンポーネントを使用できる。サーバーサイドでMarkdownをHTMLに変換するため、パフォーマンスが良い。 |
+- ブログ本文はDB上のテキストを表示しています。MDX変換ライブラリは使っていません。
+- 管理者パスワードは平文ではなく、SHA-256ハッシュを環境変数 `ADMIN_PASSWORD_HASH` として比較しています。

@@ -1,26 +1,41 @@
+# User Flow
 
-# ユーザーフロー図
+## Visitor
 
 ```mermaid
 graph TD
-    subgraph 一般ユーザー
-        A[トップページ] --> B{ナビゲーション};
-        B --> C[ポートフォリオ一覧];
-        C --> D[ポートフォリオ詳細];
-        B --> E[Sandbox一覧];
-        E --> F[Sandbox詳細];
-        B --> G[プロフィール];
-        B --> H[ブログ一覧];
-        H --> I[ブログ記事詳細];
-    end
-
-    subgraph 管理者
-        J[管理画面ログイン] --> K{管理ダッシュボード};
-        K --> L[ポートフォリオ管理];
-        L --> M[追加/編集/削除];
-        K --> N[Sandbox管理];
-        N --> O[追加/編集/削除];
-        K --> P[ブログ記事管理];
-        P --> Q[追加/編集/削除];
-    end
+  A[Home] --> B[Products]
+  A --> C[Blog]
+  A --> D[Profile]
+  B --> E[Product detail]
+  C --> F[Blog detail]
+  E --> G[Demo / App link]
+  E --> H[GitHub]
+  D --> I[External links]
 ```
+
+## Admin
+
+```mermaid
+graph TD
+  A[Admin login] --> B[Dashboard]
+  B --> C[Products admin]
+  B --> D[Blog admin]
+  B --> E[Profile admin]
+  C --> F[Create / edit product]
+  C --> G[Manage screenshots]
+  D --> H[Create / edit post]
+  E --> I[Edit profile and social links]
+  F --> J[Upload image to R2]
+  G --> J
+  I --> J
+```
+
+## Visibility Rules
+
+- Public pages show only records where `published` is true.
+- Admin pages show draft and published records.
+- Product links are selected by platform:
+  - iOS: `app_store_url`
+  - Android: `play_store_url`
+  - Web / Other: `demo_url`

@@ -18,8 +18,21 @@
 # Misc
 .DS_Store
 *.pem
+*.log
+
+# Local tool state
+.claude/
+.claude.json
+.claude.json.backup
+.serena/
+dev.log
+
+# Personal notes and local handoff files
+*メモ*.txt
+人間用メモ.txt
 
 # Local Environment Variables
+.env
 .env.local
 .env.development.local
 .env.test.local
