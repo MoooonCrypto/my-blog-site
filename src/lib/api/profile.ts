@@ -7,7 +7,7 @@ export type { Profile, SocialLink, ProfileWithSocialLinks } from '@/lib/db/schem
 
 export async function getProfile() {
   try {
-    return db.query.profiles.findFirst({
+    return await db.query.profiles.findFirst({
       with: { social_links: { orderBy: asc(social_links.display_order) } },
     })
   } catch {
