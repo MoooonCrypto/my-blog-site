@@ -1,23 +1,23 @@
-# Portfolio Blog
+# PFサイト
+
+## プロダクト名
 
 個人開発のプロダクト、技術記事、プロフィールをまとめるためのポートフォリオサイトです。
 
-公開ページは閲覧者が制作物に辿り着きやすい構成にし、掲載内容は管理画面から更新できるようにしています。プロダクト情報、ブログ記事、プロフィールはDBで管理し、画像はCloudflare R2に保存します。
-
-## Demo
+公開ページでは制作物や記事を閲覧しやすく整理し、掲載内容は管理画面から更新できます。プロダクト情報、ブログ記事、プロフィールはTurso / LibSQLで管理し、画像はCloudflare R2に保存します。
 
 本番URLとスクリーンショットは追加予定です。
 
-## Features
+## 機能
 
-- Product listing and detail pages
-- Blog listing and detail pages
-- Profile page with social links
-- Admin pages for products, blog posts, and profile content
-- Image upload to Cloudflare R2
-- Admin authentication with NextAuth Credentials
+- プロダクト一覧・詳細ページ
+- ブログ一覧・詳細ページ
+- プロフィールページ
+- プロダクト、ブログ、プロフィールの管理画面
+- Cloudflare R2への画像アップロード
+- NextAuth Credentialsによる管理画面認証
 
-## Tech Stack
+## 技術スタック
 
 - Next.js 14 App Router
 - React 18
@@ -27,8 +27,9 @@
 - Turso / LibSQL
 - NextAuth
 - Cloudflare R2
+- GitHub Actions
 
-## Project Structure
+## 設計・実装
 
 ```text
 src/app                App Router pages and route handlers
@@ -40,7 +41,13 @@ src/lib/db             Drizzle client and schema
 docs                   Project notes
 ```
 
-## Getting Started
+- 公開ページでは `published` が true のプロダクト・記事のみ表示します。
+- DBアクセスは `src/lib/api/*` に集約しています。
+- テーブル定義は `src/lib/db/schema.ts` にあります。
+- 管理画面は `/admin` 配下にまとめ、middlewareとNextAuthで保護しています。
+- CIでは実DBやR2に接続せず、ダミー環境変数でinstall、typecheck、buildを検証します。
+
+## セットアップ
 
 ```bash
 npm ci
@@ -48,11 +55,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+開発サーバーは `http://localhost:3000` で起動します。
 
-## Environment Variables
-
-See [.env.example](./.env.example).
+`.env.local` には以下を設定します。詳細は [.env.example](./.env.example) を参照してください。
 
 ```bash
 TURSO_DATABASE_URL=
@@ -68,33 +73,26 @@ CLOUDFLARE_R2_BUCKET_NAME=
 NEXT_PUBLIC_R2_PUBLIC_URL=
 ```
 
-`ADMIN_PASSWORD_HASH` is a SHA-256 hex digest.
+`ADMIN_PASSWORD_HASH` はSHA-256のhex文字列です。
 
 ```bash
 echo -n 'your-password' | shasum -a 256
 ```
 
-## Scripts
+動作確認:
 
 ```bash
-npm run dev       # start development server
-npm run build     # create production build
-npm run lint      # run Next.js lint
-npx tsc --noEmit  # typecheck
+npm run lint
+npx tsc --noEmit
+npm run build
 ```
 
-## CI
+## その他
 
-GitHub Actions runs:
+GitHub Actionsでは以下を実行します。
 
 - `npm ci`
 - `npx tsc --noEmit`
 - `npm run build`
 
-The workflow uses dummy environment values so CI can validate installation, type checking, and production build without connecting to production services.
-
-## Notes
-
-- Public product and blog pages only show records marked as `published`.
-- Admin pages are protected under `/admin`.
-- `npm run build` currently passes with non-blocking warnings from `@next/next/no-img-element` and Browserslist.
+`npm run build` は通過確認済みです。現時点では `<img>` に関するNext.js lint warningとBrowserslistの更新警告が残っていますが、buildを止めるものではありません。
