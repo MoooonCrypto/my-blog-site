@@ -1,13 +1,8 @@
+import AppGrid from "@/components/home/AppGrid";
 import { getPublishedProducts } from "@/lib/api/products";
 
 export const dynamic = "force-dynamic";
 
-const PLATFORM_LABEL: Record<string, string> = {
-  ios: "iOS",
-  android: "Android",
-  web: "Web",
-  other: "Other",
-};
 
 function getAppUrl(product: {
   platform: string;
@@ -22,6 +17,13 @@ function getAppUrl(product: {
 
 export default async function Home() {
   const products = await getPublishedProducts();
+  const appItems = products.map((product) => ({
+    id: product.id,
+    title: product.title,
+    iconUrl: product.icon_url,
+    platform: product.platform,
+    url: getAppUrl(product),
+  }));
 
   return (
     <div className="relative min-h-screen">
@@ -29,56 +31,11 @@ export default async function Home() {
 
       <div className="container mx-auto px-4 py-12 md:py-20">
         {products.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
+          <p className="py-8 text-center text-muted-foreground">
             まだ公開されているプロダクトがありません
           </p>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-x-2 gap-y-4">
-            {products.map((product, index) => {
-              const appUrl = getAppUrl(product);
-              const icon = (
-                <div
-                  className="group flex flex-col items-center gap-2 animate-fade-in-up opacity-0 cursor-pointer"
-                  style={{ animationDelay: `${index * 60}ms` }}
-                >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-border/50 bg-muted shadow-md transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl">
-                    {product.icon_url ? (
-                      <img
-                        src={product.icon_url}
-                        alt={product.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
-                        <span className="text-xl font-heading font-bold text-primary/60">
-                          {product.title.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs font-medium text-center line-clamp-2 leading-tight">
-                    {product.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center leading-tight">
-                    {PLATFORM_LABEL[product.platform] ?? product.platform}
-                  </p>
-                </div>
-              );
-
-              return appUrl ? (
-                <a
-                  key={product.id}
-                  href={appUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {icon}
-                </a>
-              ) : (
-                <div key={product.id}>{icon}</div>
-              );
-            })}
-          </div>
+          <AppGrid products={appItems} />
         )}
       </div>
     </div>
