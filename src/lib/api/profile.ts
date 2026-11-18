@@ -15,6 +15,17 @@ export async function getProfile() {
   }
 }
 
+
+export async function getSocialLinks() {
+  try {
+    return await db.query.social_links.findMany({
+      orderBy: asc(social_links.display_order),
+    })
+  } catch {
+    return []
+  }
+}
+
 export async function getProfileById(id: string) {
   return db.query.profiles.findFirst({
     where: eq(profiles.id, id),

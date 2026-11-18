@@ -22,12 +22,9 @@ export default async function BlogPage() {
 
       <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-8 md:mb-12 text-center animate-fade-in-up opacity-0">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-4">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight">
             Blog
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-            技術、開発、その他について
-          </p>
         </header>
 
         {posts.length === 0 ? (

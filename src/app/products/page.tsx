@@ -29,12 +29,9 @@ export default async function ProductsPage() {
 
       <div className="container mx-auto px-4 py-8 md:py-12">
         <header className="mb-10 text-center animate-fade-in-up opacity-0">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight mb-3">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight">
             Products
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            開発したプロダクト一覧
-          </p>
         </header>
 
         {products.length === 0 ? (

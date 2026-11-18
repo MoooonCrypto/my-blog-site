@@ -48,9 +48,6 @@ export default async function ProfilePage() {
           )}
           <div>
             <h1 className="text-4xl font-heading font-bold tracking-tight">{profile.name}</h1>
-            {profile.title && (
-              <p className="text-xl text-muted-foreground mt-1">{profile.title}</p>
-            )}
           </div>
         </header>
 

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Syne, Manrope, JetBrains_Mono, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NextAuthSessionProvider } from "@/components/session-provider";
 import { cn } from "@/lib/utils";
@@ -66,14 +65,13 @@ export default function RootLayout({
         <NextAuthSessionProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="light"
             enableSystem={false}
             disableTransitionOnChange={true}
           >
             <div className="relative flex min-h-screen flex-col overflow-x-hidden">
               <Header />
               <main className="flex-1">{children}</main>
-              <Footer />
             </div>
           </ThemeProvider>
         </NextAuthSessionProvider>

@@ -1,106 +1,59 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SocialIcon } from "@/components/SocialIcon";
 import { SideDrawer } from "@/components/layout/SideDrawer";
-import { cn } from "@/lib/utils";
-
-type SocialLinkItem = {
-  platform: string;
-  url: string;
-  icon: string | null;
-};
 
 interface HeaderClientProps {
-  headerSocialLinks: SocialLinkItem[];
+  socialLinks: Array<{
+    platform: string;
+    url: string;
+    icon_url: string | null;
+  }>;
 }
 
-export const HeaderClient = ({ headerSocialLinks }: HeaderClientProps) => {
+export const HeaderClient = ({ socialLinks }: HeaderClientProps) => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const navLinks = [
-    { href: "/products", label: "Products" },
-    { href: "/blog", label: "Blog" },
-    { href: "/profile", label: "Profile" },
-  ];
-
-  const renderHeaderIcon = (item: SocialLinkItem) => {
-    if (item.icon && item.icon.trim() !== "") {
-      return (
-        <Link
-          key={`${item.platform}-${item.url}`}
-          href={item.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden hover:opacity-80 transition-opacity flex-shrink-0"
-        >
-          <Image src={item.icon} alt={item.platform} width={32} height={32} className="w-full h-full object-cover" />
-        </Link>
-      );
-    }
-    return <SocialIcon key={`${item.platform}-${item.url}`} platform={item.platform} href={item.url} />;
-  };
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b glass-effect">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="font-heading font-bold text-lg md:text-2xl tracking-tight hover:text-primary transition-colors flex-shrink-0"
-          >
-            mokosau
-          </Link>
+        <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
+          <div className="flex min-w-0 items-center gap-2 overflow-x-auto py-1">
+            {socialLinks.map((link) =>
+              link.icon_url ? (
+                <a
+                  key={`${link.platform}-${link.url}`}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={link.platform}
+                  className="h-8 w-8 shrink-0 overflow-hidden rounded-full transition-transform duration-200 hover:scale-105"
+                >
+                  <Image
+                    src={link.icon_url}
+                    alt=""
+                    width={32}
+                    height={32}
+                    className="h-full w-full object-cover"
+                  />
+                </a>
+              ) : (
+                <SocialIcon key={`${link.platform}-${link.url}`} platform={link.platform} href={link.url} />
+              )
+            )}
+          </div>
 
-          {/* Desktop: header SNS icons (show_in_header=true, max 5) */}
-          {headerSocialLinks.length > 0 && (
-            <div className="hidden md:flex items-center gap-2">
-              {headerSocialLinks.map((item) => renderHeaderIcon(item))}
-            </div>
-          )}
-
-          {/* Desktop: nav + ThemeToggle + drawer trigger */}
-          <nav className="hidden md:flex items-center gap-2">
-            <ul className="flex items-center space-x-1 mr-2">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={cn(
-                      "px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
-                      pathname === link.href
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <div className="flex shrink-0 items-center gap-1">
             <ThemeToggle />
             <button
               onClick={() => setDrawerOpen(true)}
-              className="p-2 rounded-md hover:bg-muted transition-colors"
-              aria-label="メニューを開く"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          </nav>
-
-          {/* Mobile: ThemeToggle + drawer trigger */}
-          <div className="flex items-center gap-1 md:hidden">
-            <ThemeToggle />
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="p-2 rounded-md hover:bg-muted transition-colors"
+              className="rounded-md p-2 transition-colors hover:bg-muted"
               aria-label="メニューを開く"
             >
               <Menu className="h-5 w-5" />
